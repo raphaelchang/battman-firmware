@@ -214,5 +214,14 @@ ULIBS =
 # End of user defines
 ##############################################################################
 
+all: build/$(PROJECT).bin
+
+build/$(PROJECT).bin: build/$(PROJECT).elf 
+		$(BIN) build/$(PROJECT).elf build/$(PROJECT).bin
+
+# add upload to the board
+upload: build/$(PROJECT).bin 
+		sudo dfu-util -a 0 -D build/$(PROJECT).bin -S 3059396F3435 -s 0x08000000
+
 RULESPATH = $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC
 include $(RULESPATH)/rules.mk
