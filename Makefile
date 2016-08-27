@@ -86,6 +86,7 @@ endif
 PROJECT = battman
 
 # Imported source files and paths
+STMLIB = STM32F30x_StdPeriph_Driver
 CHIBIOS = ChibiOS
 # Startup files.
 include $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32f3xx.mk
@@ -115,7 +116,7 @@ CSRC = $(STARTUPSRC) \
        $(TESTSRC) \
        usbcfg.c \
        $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
-       main.c
+       main.c gpio.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -213,6 +214,11 @@ ULIBS =
 #
 # End of user defines
 ##############################################################################
+
+#include $(STMLIB)/stm32lib.mk
+#CSRC += $(STM32SRC)
+#INCDIR += $(STM32INC)
+#USE_OPT += -DUSE_STDPERIPH_DRIVER
 
 all: build/$(PROJECT).bin
 

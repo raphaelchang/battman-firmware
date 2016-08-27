@@ -1,5 +1,6 @@
 #include "ch.h"
 #include "hal.h"
+#include "gpio.h"
 
 int main(void)
 {
