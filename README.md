@@ -5,11 +5,6 @@ Firmware for the "battman" battery management system.
 ```
 git clone https://github.com/raphaelchang/battman-firmware.git
 ```
- Fetch the ChibiOS submodule.
-```
-git submodule init
-git submodule update
-```
 ##Compiling
 You'll need to install the following gcc arm cross compiler.
 ```
