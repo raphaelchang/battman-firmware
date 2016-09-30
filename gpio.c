@@ -4,10 +4,6 @@
 
 void gpio_init(void)
 {
-    // ENABLE GPIO MODULES
-//    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-//    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
-//    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 
     //CHARGING CIRCUIT
     palSetPadMode(CHRG_STAT_1_GPIO, CHRG_STAT_1_PIN, PAL_MODE_INPUT_PULLUP);
@@ -20,25 +16,46 @@ void gpio_init(void)
     palSetPadMode(PRECHRG_GPIO, PRECHRG_PIN, PAL_MODE_OUTPUT_PUSHPULL |
                         PAL_STM32_OSPEED_HIGHEST);
     palClearPad(PRECHRG_GPIO, PRECHRG_PIN);
+    
     palSetPadMode(POWER_LED_GPIO, POWER_LED_PIN, PAL_MODE_OUTPUT_PUSHPULL |
                         PAL_STM32_OSPEED_HIGHEST);
     palClearPad(POWER_LED_GPIO, POWER_LED_PIN);
+    
     palSetPadMode(PWR_BTN_NC_GPIO, PWR_BTN_NC_PIN, PAL_MODE_INPUT_PULLUP);
+    
     palSetPadMode(PWR_SW_GPIO, PWR_SW_PIN, PAL_MODE_OUTPUT_PUSHPULL |
                         PAL_STM32_OSPEED_HIGHEST);
     palSetPad(PWR_SW_GPIO, PWR_SW_PIN); //keep myself on
+    
     palSetPadMode(LOAD_SW_GPIO, LOAD_SW_PIN, PAL_MODE_OUTPUT_PUSHPULL |
                         PAL_STM32_OSPEED_HIGHEST);
     palClearPad(LOAD_SW_GPIO, LOAD_SW_PIN);
+    
     palSetPadMode(CHRG_DETECT_GPIO, CHRG_DETECT_PIN, PAL_MODE_INPUT_PULLUP);
-
-
 
     // WS2812B
     palSetPadMode(WS2812_SW_GPIO, WS2812_SW_PIN, PAL_MODE_OUTPUT_PUSHPULL |
                         PAL_STM32_OSPEED_HIGHEST);
 
+    palClearPad(WS2812_SW_GPIO, WS2812_SW_PIN);
+    
     // USB
     palSetPadMode(USB_DM_GPIO, USB_DM_PIN, PAL_MODE_ALTERNATE(14));
     palSetPadMode(USB_DP_GPIO, USB_DP_PIN, PAL_MODE_ALTERNATE(14));
+
+    //SPI
+    palSetPadMode(SCK_GPIO, SCK_PIN, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);
+    palSetPadMode(SDO_GPIO, SDO_PIN, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);
+    palSetPadMode(SDI_GPIO, SDI_PIN, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);
+    
+    //LTC6803 CS
+    palSetPadMode(LTC6803_CS_GPIO, LTC6803_CS_PIN, PAL_MODE_OUTPUT_PUSHPULL |
+                        PAL_STM32_OSPEED_HIGHEST);
+
+    palClearPad(LTC6803_CS_GPIO, LTC6803_CS_PIN);
+    //ADC CS
+    palSetPadMode(ADC_CS_GPIO, ADC_CS_PIN, PAL_MODE_OUTPUT_PUSHPULL |
+                        PAL_STM32_OSPEED_HIGHEST);
+    palClearPad(ADC_CS_GPIO, ADC_CS_PIN);
+
 }

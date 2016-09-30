@@ -16,7 +16,8 @@ int main(void) {
     halInit();
     chSysInit();
     gpio_init();
-
+    
+    //start USB
     sduObjectInit(&SDU1);
     sduStart(&SDU1, &serusbcfg);
 
@@ -24,8 +25,6 @@ int main(void) {
     chThdSleepMilliseconds(1500);
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp)
-
-    palClearPad(WS2812_SW_GPIO, WS2812_SW_PIN);
 
     while(1)
     {
