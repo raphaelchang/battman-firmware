@@ -24,17 +24,12 @@ brew install dfu-util
 ####Ubuntu
 On Ubuntu 14.04, dfu-util must be installed from source. See instructions here: http://dfu-util.sourceforge.net/build.html.
 
-####Editing Makefile
-Prior to uploading code to Battman, the Makefile must be edited for your particular board's serial number.
+####Uploading code
 
 1. Plug in Battman to computer via USB.
 2. Enable bootloader mode by reseting the board while the bootloader button is held down.
-3. Run ```dfu-util -l```.
-4. Copy the serial number of Battman into the Makefile in the following location.
-    ```sudo dfu-util -a 0 -D build/$(PROJECT).bin -S <serial> -s 0x08000000```
-
-####Uploading code
-Run the following to build and upload the code.
+3. Ensure that no other boards are connected that are also in bootloader mode.
+4. Run the following to build and upload the code.
 ```
 make upload
 ```
