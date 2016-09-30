@@ -25,7 +25,7 @@
  * Board identifier.
  */
 #define BOARD_ST_STM32F3_DISCOVERY
-#define BOARD_NAME                  "STMicroelectronics STM32F3-Discovery"
+#define BOARD_NAME                  "battman"
 
 /*
  * Board oscillators-related settings.
@@ -41,7 +41,7 @@
 #define STM32_HSECLK                8000000U
 #endif
 
-#define STM32_HSE_BYPASS
+//#define STM32_HSE_BYPASS
 
 /*
  * MCU type as defined in the ST header.
