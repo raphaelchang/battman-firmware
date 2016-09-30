@@ -227,7 +227,7 @@ build/$(PROJECT).bin: build/$(PROJECT).elf
 
 # add upload to the board
 upload: build/$(PROJECT).bin
-	sudo dfu-util -a 0 -D build/$(PROJECT).bin -S 206F33592038 -s 0x08000000
+	sudo dfu-util -a 0 -D build/$(PROJECT).bin -d ,0483:df11 -s 0x08000000
 
 RULESPATH = $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC
 include $(RULESPATH)/rules.mk
