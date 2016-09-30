@@ -35,10 +35,8 @@ void gpio_init(void)
 
 
     // WS2812B
-    //palSetPadMode(WS2812_SW_GPIO, WS2812_SW_PIN,
-    //        PAL_MODE_ALTERNATE(GPIO_AF_TIM3) |
-    //        PAL_STM32_OTYPE_PUSHPULL |
-    //        PAL_STM32_OSPEED_MID1);
+    palSetPadMode(WS2812_SW_GPIO, WS2812_SW_PIN, PAL_MODE_OUTPUT_PUSHPULL |
+                        PAL_STM32_OSPEED_HIGHEST);
 
     // USB
     palSetPadMode(USB_DM_GPIO, USB_DM_PIN, PAL_MODE_ALTERNATE(10));
