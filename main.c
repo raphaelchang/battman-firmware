@@ -16,20 +16,20 @@
 
 #include "ch.h"
 #include "hal.h"
-
+#include "gpio.h"
+#include "hw_conf.h"
 
 int main(void) {
 
     halInit();
     chSysInit();
+    gpio_init();
 
-    palSetPadMode(GPIOB, 14, PAL_MODE_OUTPUT_PUSHPULL |
-                                    PAL_STM32_OSPEED_HIGHEST);
     while(1)
     {
-    palClearPad(GPIOB, 14);
+    palClearPad(WS2812_SW_GPIO, WS2812_SW_PIN);
     chThdSleepMilliseconds(100);
-    palSetPad(GPIOB, 14);
+    palSetPad(WS2812_SW_GPIO, WS2812_SW_PIN);
     chThdSleepMilliseconds(100);
     }
 
