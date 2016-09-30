@@ -32,7 +32,7 @@ int main(void) {
         chThdSleepMilliseconds(100);
         palSetPad(WS2812_SW_GPIO, WS2812_SW_PIN);
         chThdSleepMilliseconds(100);
-        chprintf((BaseSequentialStream *)&SDU1, "%s\n", "test");
+        chprintf((BaseSequentialStream *)&SDU1, "%s\n", "I am vengeance, I am the night, I am Battman.");
     }
 
 }
