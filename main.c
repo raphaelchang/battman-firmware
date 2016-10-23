@@ -7,6 +7,7 @@
 #include "usbcfg.h"
 #include "hw_conf.h"
 #include "chprintf.h"
+#include "led_rgb.h"
 
 #define usb_lld_connect_bus(usbp)
 #define usb_lld_disconnect_bus(usbp)
@@ -16,6 +17,7 @@ int main(void) {
     halInit();
     chSysInit();
     gpio_init();
+    led_rgb_init();
     
     //start USB
     sduObjectInit(&SDU1);
@@ -28,9 +30,9 @@ int main(void) {
 
     while(1)
     {
-        palClearPad(WS2812_SW_GPIO, WS2812_SW_PIN);
+        led_rgb_set(0x00FF00);
         chThdSleepMilliseconds(100);
-        palSetPad(WS2812_SW_GPIO, WS2812_SW_PIN);
+        led_rgb_set(0x000000);
         chThdSleepMilliseconds(100);
         chprintf((BaseSequentialStream *)&SDU1, "%s\n", "I am vengeance, I am the night, I am Battman.");
     }

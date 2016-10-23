@@ -116,7 +116,7 @@ CSRC = $(STARTUPSRC) \
        $(TESTSRC) \
        usbcfg.c \
        $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
-       main.c gpio.c
+       main.c gpio.c led_rgb.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
