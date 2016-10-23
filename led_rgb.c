@@ -18,16 +18,20 @@ static PWMConfig pwmcfg = {
 
 void led_rgb_init(void)
 {
+#ifdef BATTMAN_4_0
     pwmStart(&LED_PWM_DEV, &pwmcfg);
     pwmEnableChannel(&LED_PWM_DEV, LED_R_CHANNEL, 0);
     pwmEnableChannel(&LED_PWM_DEV, LED_G_CHANNEL, 0);
     pwmEnableChannel(&LED_PWM_DEV, LED_B_CHANNEL, 0);
+#endif
 }
 void led_rgb_set(uint32_t color)
 {
+#ifdef BATTMAN_4_0
     pwmEnableChannel(&LED_PWM_DEV, LED_B_CHANNEL, color & 0xFF);
     color = color >> 8;
     pwmEnableChannel(&LED_PWM_DEV, LED_G_CHANNEL, color & 0xFF);
     color = color >> 8;
     pwmEnableChannel(&LED_PWM_DEV, LED_R_CHANNEL, color & 0xFF);
+#endif
 }
