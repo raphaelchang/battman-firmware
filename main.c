@@ -50,7 +50,7 @@ int main(void) {
         ltc6803_rdcv(cells);
         for (int i = 0; i < 12; i++)
         {
-            chprintf((BaseSequentialStream *)&SDU1, "Cell %d: %d\n", i, cells[i]);
+            chprintf((BaseSequentialStream *)&SDU1, "Cell %d: %fmV\n", i, cells[0][i] * 1.5);
         }
     }
 

@@ -11,16 +11,19 @@ static const SPIConfig ls_spicfg = {
     NULL,
     GPIOA,
     4,
-    SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_CPOL | SPI_CR1_CPHA,
+    SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA,
     SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0
 };
 
 static uint8_t total_ic = 1;
 static uint8_t pec8_calc(uint8_t len, uint8_t *data);
+static void spi_sw_transfer(char *in_buf, const char *out_buf, int length);
 
 void ltc6803_init(void)
 {
-
+    palSetPadMode(SCK_GPIO, SCK_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
+    palSetPadMode(MISO_GPIO, MISO_PIN, PAL_MODE_INPUT_PULLUP | PAL_STM32_OSPEED_HIGHEST);
+    palSetPadMode(MOSI_GPIO, MOSI_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
 }
 
 //Function that calculates PEC byte
@@ -97,8 +100,9 @@ void ltc6803_wrcfg(uint8_t config[][6])
     spiAcquireBus(&SPID1);              /* Acquire ownership of the bus.    */
     spiStart(&SPID1, &ls_spicfg);       /* Setup transfer parameters.       */
     spiSelect(&SPID1);                  /* Slave Select assertion.          */
-    spiExchange(&SPID1, CMD_LEN,
-	    cmd, rxbuf);          /* Atomic transfer operations.      */
+    /*spiExchange(&SPID1, CMD_LEN,*/
+	    /*cmd, rxbuf);          [> Atomic transfer operations.      <]*/
+    spi_sw_transfer(rxbuf, cmd, CMD_LEN);
 
     spiUnselect(&SPID1);                /* Slave Select de-assertion.       */
     spiReleaseBus(&SPID1);              /* Ownership release.               */
@@ -113,7 +117,8 @@ void ltc6803_stcvad(void)
     spiAcquireBus(&SPID1);
     spiStart(&SPID1, &ls_spicfg);
     spiSelect(&SPID1);
-    spiExchange(&SPID1, 2, txbuf, rxbuf);
+    /*spiExchange(&SPID1, 2, txbuf, rxbuf);*/
+    spi_sw_transfer(rxbuf, txbuf, 2);
     spiUnselect(&SPID1);                /* Slave Select de-assertion.       */
     spiReleaseBus(&SPID1);              /* Ownership release.               */
 }
@@ -133,13 +138,15 @@ void ltc6803_rdcv(uint16_t cells[][12])
     spiAcquireBus(&SPID1);
     spiStart(&SPID1, &ls_spicfg);
     spiSelect(&SPID1);
-    spiExchange(&SPID1, 2, txbuf, rxbuf);
+    /*spiExchange(&SPID1, 2, txbuf, rxbuf);*/
+    spi_sw_transfer(rxbuf, txbuf, 2);
     txbuf[0] = 0xFF;
     for (int i = 0; i < total_ic; i++)
     {
 	for (int j = 0; j < 19 ; j++)
 	{
-            spiExchange(&SPID1, 1, txbuf, rxbuf);
+            /*spiExchange(&SPID1, 1, txbuf, rxbuf);*/
+            spi_sw_transfer(rxbuf, txbuf, 1);
 	    rx_data[data_counter++] = rxbuf[0];
 	}
     }
@@ -177,3 +184,34 @@ void ltc6803_rdcv(uint16_t cells[][12])
 
     }
 }
+
+static void spi_sw_transfer(char *in_buf, const char *out_buf, int length) {
+    palSetPad(SCK_GPIO, SCK_PIN);
+    chThdSleepMicroseconds(100);
+
+    for (int i = 0;i < length;i++) {
+        unsigned char send = out_buf ? out_buf[i] : 0;
+        unsigned char recieve = 0;
+
+        for (int bit=0;bit < 8;bit++) {
+            palClearPad(SCK_GPIO, SCK_PIN);
+            palWritePad(MOSI_GPIO, MOSI_PIN, send >> 7);
+            send <<= 1;
+
+            chThdSleepMicroseconds(100);
+
+            recieve <<= 1;
+            if (palReadPad(MISO_GPIO, MISO_PIN)) {
+                recieve |= 0x1;
+            }
+
+            palSetPad(SCK_GPIO, SCK_PIN);
+            chThdSleepMicroseconds(100);
+        }
+
+        if (in_buf) {
+            in_buf[i] = recieve;
+        }
+    }
+}
+
