@@ -5,7 +5,9 @@
 
 # Compiler options here.
 ifeq ($(USE_OPT),)
-  USE_OPT = -O2 -ggdb -fomit-frame-pointer -falign-functions=16 -std=c11
+  USE_OPT = -O2 -ggdb -fomit-frame-pointer -falign-functions=16 -std=c99
+  USE_OPT += -DBOARD_OTG_NOVBUSSENS $(build_args) --specs=nosys.specs
+  USE_OPT += -fsingle-precision-constant -Wdouble-promotion
 endif
 
 # C specific options here (added to USE_OPT).
@@ -86,10 +88,9 @@ endif
 PROJECT = battman
 
 # Imported source files and paths
-STMLIB = STM32F30x_StdPeriph_Driver
-CHIBIOS = ChibiOS
+CHIBIOS = ChibiOS_16.1.4
 # Startup files.
-include $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32f3xx.mk
+include $(CHIBIOS)/os/common/ports/ARMCMx/compilers/GCC/mk/startup_stm32f3xx.mk
 # HAL-OSAL files (optional).
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/hal/ports/STM32/STM32F3xx/platform.mk
@@ -97,7 +98,7 @@ include $(CHIBIOS)/os/hal/boards/battman/board.mk
 include $(CHIBIOS)/os/hal/osal/rt/osal.mk
 # RTOS files (optional).
 include $(CHIBIOS)/os/rt/rt.mk
-include $(CHIBIOS)/os/common/ports/ARMCMx/compilers/GCC/mk/port_v7m.mk
+include $(CHIBIOS)/os/rt/ports/ARMCMx/compilers/GCC/mk/port_v7m.mk
 # Other files (optional).
 include $(CHIBIOS)/test/rt/test.mk
 
@@ -114,9 +115,7 @@ CSRC = $(STARTUPSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
        $(TESTSRC) \
-       usbcfg.c \
-       $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
-       main.c gpio.c led_rgb.c ltc6803.c
+       main.c gpio.c led_rgb.c ltc6803.c comm_usb.c packet.c console.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -166,8 +165,8 @@ CPPC = $(TRGT)g++
 # Enable loading with g++ only if you need C++ runtime support.
 # NOTE: You can use C++ even without C++ support if you are careful. C++
 #       runtime support makes code size explode.
-LD   = $(TRGT)gcc
-#LD   = $(TRGT)g++
+#LD   = $(TRGT)gcc
+LD   = $(TRGT)g++
 CP   = $(TRGT)objcopy
 AS   = $(TRGT)gcc -x assembler-with-cpp
 AR   = $(TRGT)ar
@@ -229,5 +228,5 @@ build/$(PROJECT).bin: build/$(PROJECT).elf
 upload: build/$(PROJECT).bin
 	sudo dfu-util -a 0 -D build/$(PROJECT).bin -d ,0483:df11 -s 0x08000000
 
-RULESPATH = $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC
+RULESPATH = $(CHIBIOS)/os/common/ports/ARMCMx/compilers/GCC
 include $(RULESPATH)/rules.mk

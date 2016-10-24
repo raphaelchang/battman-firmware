@@ -362,9 +362,9 @@
  * @details If enabled then the context switch circular trace buffer is
  *          activated.
  *
- * @note    The default is @p CH_DBG_TRACE_MASK_NONE.
+ * @note    The default is @p FALSE.
  */
-#define CH_DBG_TRACE_MASK                   CH_DBG_TRACE_MASK_NONE
+#define CH_DBG_ENABLE_TRACE                 FALSE
 
 /**
  * @brief   Trace buffer entries.
@@ -404,7 +404,7 @@
  * @note    This debug option is not currently compatible with the
  *          tickless mode.
  */
-#define CH_DBG_THREADS_PROFILING            FALSE
+#define CH_DBG_THREADS_PROFILING            TRUE
 
 /** @} */
 

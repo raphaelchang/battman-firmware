@@ -4,14 +4,10 @@
 #include "ch.h"
 #include "hal.h"
 #include "gpio.h"
-#include "usbcfg.h"
+#include "comm_usb.h"
 #include "hw_conf.h"
-#include "chprintf.h"
 #include "led_rgb.h"
 #include "ltc6803.h"
-
-#define usb_lld_connect_bus(usbp)
-#define usb_lld_disconnect_bus(usbp)
 
 int main(void) {
 
@@ -20,15 +16,7 @@ int main(void) {
     gpio_init();
     led_rgb_init();
     ltc6803_init();
-    
-    //start USB
-    sduObjectInit(&SDU1);
-    sduStart(&SDU1, &serusbcfg);
-
-    usbDisconnectBus(serusbcfg.usbp);
-    chThdSleepMilliseconds(1500);
-    usbStart(serusbcfg.usbp, &usbcfg);
-    usbConnectBus(serusbcfg.usbp)
+    comm_usb_init();
 
     while(1)
     {
@@ -50,7 +38,7 @@ int main(void) {
         ltc6803_rdcv(cells);
         for (int i = 0; i < 12; i++)
         {
-            chprintf((BaseSequentialStream *)&SDU1, "Cell %d: %fmV\n", i, cells[0][i] * 1.5);
+            /*chprintf((BaseSequentialStream *)&SDU1, "Cell %d: %fmV\n", i, cells[0][i] * 1.5);*/
         }
     }
 
