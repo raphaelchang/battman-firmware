@@ -16,10 +16,6 @@
 #define LTC6803_CS_GPIO GPIOA
 #define LTC6803_CS_PIN 4
 
-// ADC
-#define ADC_CS_GPIO GPIOA
-#define ADC_CS_PIN 15
-
 // SPI
 #define SCK_GPIO GPIOA
 #define SCK_PIN 5
@@ -35,18 +31,18 @@
 #define CAN_TX_PIN 9
 
 // GPIO
-#define PRECHRG_GPIO GPIOB
-#define PRECHRG_PIN 0
+#define PCHG_SW_GPIO GPIOB
+#define PCHG_SW_PIN 0
 #define POWER_LED_GPIO GPIOB
 #define POWER_LED_PIN 1
-#define PWR_BTN_NC_GPIO GPIOB
-#define PWR_BTN_NC_PIN 3
+#define PWR_BTN_GPIO GPIOB
+#define PWR_BTN_PIN 3
 #define PWR_SW_GPIO GPIOB
 #define PWR_SW_PIN 4
-#define LOAD_SW_GPIO GPIOB
-#define LOAD_SW_PIN 5
-#define CHRG_DETECT_GPIO GPIOB
-#define CHRG_DETECT_PIN 6
+#define DSG_SW_GPIO GPIOB
+#define DSG_SW_PIN 5
+#define CHG_DETECT_GPIO GPIOB
+#define CHG_DETECT_PIN 6
 
 // WS2812
 #define WS2812_SW_GPIO GPIOB
