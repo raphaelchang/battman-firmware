@@ -65,8 +65,8 @@
 #define CHG_SW_PIN 6
 #define PWR_BTN_GPIO GPIOB
 #define PWR_BTN_PIN 2
-#define CHG_DETECT_GPIO GPIOB
-#define CHG_DETECT_PIN 0
+#define CHG_SENSE_GPIO GPIOB
+#define CHG_SENSE_PIN 0
 
 // USB
 #define USB_DM_GPIO GPIOA

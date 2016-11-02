@@ -5,41 +5,101 @@
 #include "hal.h"
 #include "gpio.h"
 #include "comm_usb.h"
+#include "comm_can.h"
 #include "hw_conf.h"
 #include "led_rgb.h"
 #include "ltc6803.h"
+#include "charger.h"
+#include "power.h"
+#include "adc.h"
+#include "rtcc.h"
+#include "buzzer.h"
+#include "packet.h"
+#include "console.h"
+
+static const I2CConfig i2cconfig = {
+    STM32_TIMINGR_PRESC(15U) |
+        STM32_TIMINGR_SCLDEL(4U) | STM32_TIMINGR_SDADEL(2U) |
+        STM32_TIMINGR_SCLH(15U)  | STM32_TIMINGR_SCLL(21U),
+    0,
+    0
+};
+
+static THD_WORKING_AREA(led_update_wa, 1024);
+static THD_FUNCTION(led_update, arg) {
+    (void)arg;
+
+    chRegSetThreadName("LED update");
+
+    for(;;)
+    {
+        if (packet_connect_event())
+        {
+            led_rgb_set(0x00FFFF);
+            chThdSleepMilliseconds(100);
+            led_rgb_set(0);
+            chThdSleepMilliseconds(100);
+            led_rgb_set(0x00FFFF);
+            chThdSleepMilliseconds(100);
+            led_rgb_set(0);
+            chThdSleepMilliseconds(100);
+            led_rgb_set(0x00FFFF);
+            chThdSleepMilliseconds(100);
+            led_rgb_set(0);
+            chThdSleepMilliseconds(100);
+        }
+        else if (comm_usb_is_active())
+        {
+            led_rgb_set(0x00FF00);
+            chThdSleepMilliseconds(250);
+            led_rgb_set(0);
+            chThdSleepMilliseconds(250);
+        }
+        else
+        {
+            led_rgb_set(0x00FF00);
+            chThdSleepMilliseconds(500);
+            led_rgb_set(0);
+            chThdSleepMilliseconds(500);
+        }
+    }
+}
 
 int main(void) {
 
     halInit();
     chSysInit();
     gpio_init();
-    led_rgb_init();
+    config_init();
+    power_init();
+    adc_init();
+    i2cStart(&I2C_DEV, &i2cconfig);
     ltc6803_init();
+    charger_init();
+    current_monitor_init();
+    rtcc_init();
+    buzzer_init();
+    comm_can_init();
+    led_rgb_init();
+    chThdCreateStatic(led_update_wa, sizeof(led_update_wa), NORMALPRIO, led_update, NULL);
     comm_usb_init();
 
     while(1)
     {
-        led_rgb_set(0x00FF00);
-        chThdSleepMilliseconds(100);
-        led_rgb_set(0x000000);
-        chThdSleepMilliseconds(100);
-        uint8_t config[1][6];
-        config[0][0] = 0b01100001;
-        config[0][1] = 0b00000000;
-        config[0][2] = 0b00000000;
-        config[0][3] = 0b11111100;
-        config[0][4] = 0b00000000;
-        config[0][5] = 0b00000000;
-        ltc6803_wrcfg(config);
-        uint16_t cells[1][12];
-        ltc6803_stcvad();
-        chThdSleepMilliseconds(13);
-        ltc6803_rdcv(cells);
-        for (int i = 0; i < 12; i++)
-        {
-            /*chprintf((BaseSequentialStream *)&SDU1, "Cell %d: %fmV\n", i, cells[0][i] * 1.5);*/
-        }
+        /*if (comm_usb_is_active())*/
+        /*for (int i = 0; i < 12; i++)*/
+        /*{*/
+            /*console_printf("Cell %d: %fmV\n", i, cells[0][i] * 1.5);*/
+        /*}*/
+        /*msg_t msg = ad5272_set_resistance(277);*/
+        /*console_printf("i2c %d\n", msg);*/
+        adc_update();
+        ltc6803_update();
+        charger_update();
+        current_monitor_update();
+        power_update();
+        rtcc_update();
+        buzzer_update();
+        comm_can_update();
     }
-
 }

@@ -6,7 +6,7 @@
 # Compiler options here.
 ifeq ($(USE_OPT),)
   USE_OPT = -O2 -ggdb -fomit-frame-pointer -falign-functions=16 -std=c99
-  USE_OPT += -DBOARD_OTG_NOVBUSSENS $(build_args) --specs=nosys.specs
+  USE_OPT += -DBOARD_OTG_NOVBUSSENS --specs=nosys.specs $(build_args)
   USE_OPT += -fsingle-precision-constant -Wdouble-promotion
 endif
 
@@ -76,6 +76,11 @@ ifeq ($(USE_FPU),)
   USE_FPU = hard
 endif
 
+# Enable this if you really want to use the STM FWLib.
+ifeq ($(USE_FWLIB),)
+    USE_FWLIB = yes
+endif
+
 #
 # Architecture or project specific options
 ##############################################################################
@@ -103,7 +108,7 @@ include $(CHIBIOS)/os/rt/ports/ARMCMx/compilers/GCC/mk/port_v7m.mk
 include $(CHIBIOS)/test/rt/test.mk
 
 # Define linker script file here
-LDSCRIPT= $(STARTUPLD)/STM32F303xC.ld
+LDSCRIPT= STM32F303xC.ld
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -115,7 +120,9 @@ CSRC = $(STARTUPSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
        $(TESTSRC) \
-       main.c gpio.c led_rgb.c ltc6803.c comm_usb.c packet.c console.c
+       $(CHIBIOS)/os/hal/lib/streams/memstreams.c \
+       $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
+       main.c gpio.c led_rgb.c ltc6803.c comm_usb.c comm_can.c packet.c console.c charger.c adc.c rtcc.c power.c current_monitor.c buzzer.c eeprom.c config.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -214,10 +221,16 @@ ULIBS =
 # End of user defines
 ##############################################################################
 
-#include $(STMLIB)/stm32lib.mk
-#CSRC += $(STM32SRC)
-#INCDIR += $(STM32INC)
-#USE_OPT += -DUSE_STDPERIPH_DRIVER
+ifeq ($(USE_FWLIB),yes)
+    include $(CHIBIOS)/ext/stdperiph_stm32f3/stm32lib.mk
+    CSRC += $(STM32SRC)
+    INCDIR += $(STM32INC)
+    USE_OPT += -DUSE_STDPERIPH_DRIVER
+endif
+
+include infinibatt-library/infinibatt.mk
+CSRC += $(INFINIBATTSRC)
+INCDIR += $(INFINIBATTINC)
 
 all: build/$(PROJECT).bin
 

@@ -1,6 +1,8 @@
 #include "ltc6803.h"
 #include "ch.h"
 #include "hal.h"
+#include <string.h>
+#include "config.h"
 
 #define PEC_POLY 7
 
@@ -15,60 +17,46 @@ static const SPIConfig ls_spicfg = {
     SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0
 };
 
-static uint8_t total_ic = 1;
+static volatile Config *config;
+static const uint8_t total_ic = 1;
+static volatile uint16_t cell_voltages[12];
+static void ltc6803_wrcfg(uint8_t config[][6]);
+static void ltc6803_stcvad(void);
+static void ltc6803_rdcv(uint16_t cells[][12]);
 static uint8_t pec8_calc(uint8_t len, uint8_t *data);
 static void spi_sw_transfer(char *in_buf, const char *out_buf, int length);
 
 void ltc6803_init(void)
 {
+    config = config_get_configuration();
     palSetPadMode(SCK_GPIO, SCK_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
     palSetPadMode(MISO_GPIO, MISO_PIN, PAL_MODE_INPUT_PULLUP | PAL_STM32_OSPEED_HIGHEST);
     palSetPadMode(MOSI_GPIO, MOSI_PIN, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
 }
 
-//Function that calculates PEC byte
-static uint8_t pec8_calc(uint8_t len, uint8_t *data)
+void ltc6803_update(void)
 {
-    uint8_t  remainder = 0x41;//PEC_SEED;
-    int byte;
-    uint8_t bit;
-    /*
-     * Perform modulo-2 division, a byte at a time.
-     */
-    for (byte = 0; byte < len; ++byte)
-    {
-	/*
-	 * Bring the next byte into the remainder.
-	 */
-	remainder ^= data[byte];
-
-	/*
-	 * Perform modulo-2 division, a bit at a time.
-	 */
-	for (bit = 8; bit > 0; --bit)
-	{
-	    /*
-	     * Try to divide the current data bit.
-	     */
-	    if (remainder & 128)
-	    {
-		remainder = (remainder << 1) ^ PEC_POLY;
-	    }
-	    else
-	    {
-		remainder = (remainder << 1);
-	    }
-	}
-    }
-
-    /*
-     * The final remainder is the CRC result.
-     */
-    return (remainder);
-
+    uint8_t config[1][6];
+    config[0][0] = 0b01100001;
+    config[0][1] = 0b00000000;
+    config[0][2] = 0b00000000;
+    config[0][3] = 0b11111100;
+    config[0][4] = 0b00000000;
+    config[0][5] = 0b00000000;
+    ltc6803_wrcfg(config);
+    uint16_t cells[1][12];
+    ltc6803_stcvad();
+    chThdSleepMilliseconds(13);
+    ltc6803_rdcv(cells);
+    memcpy(cell_voltages, cells[1], sizeof(uint16_t) * 12);
 }
 
-void ltc6803_wrcfg(uint8_t config[][6])
+uint16_t* ltc6803_get_cell_voltages(void)
+{
+    return cell_voltages;
+}
+
+static void ltc6803_wrcfg(uint8_t config[][6])
 {
     uint8_t BYTES_IN_REG = 6;
     uint8_t CMD_LEN = 2+(7*total_ic);
@@ -108,7 +96,7 @@ void ltc6803_wrcfg(uint8_t config[][6])
     spiReleaseBus(&SPID1);              /* Ownership release.               */
 }
 
-void ltc6803_stcvad(void)
+static void ltc6803_stcvad(void)
 {
     uint8_t txbuf[2];
     uint8_t rxbuf[2];
@@ -123,7 +111,7 @@ void ltc6803_stcvad(void)
     spiReleaseBus(&SPID1);              /* Ownership release.               */
 }
 
-void ltc6803_rdcv(uint16_t cells[][12])
+static void ltc6803_rdcv(uint16_t cells[][12])
 {
     int data_counter = 0;
     int pec_error = 0;
@@ -213,5 +201,46 @@ static void spi_sw_transfer(char *in_buf, const char *out_buf, int length) {
             in_buf[i] = recieve;
         }
     }
+}
+
+static uint8_t pec8_calc(uint8_t len, uint8_t *data)
+{
+    uint8_t  remainder = 0x41;//PEC_SEED;
+    int byte;
+    uint8_t bit;
+    /*
+     * Perform modulo-2 division, a byte at a time.
+     */
+    for (byte = 0; byte < len; ++byte)
+    {
+	/*
+	 * Bring the next byte into the remainder.
+	 */
+	remainder ^= data[byte];
+
+	/*
+	 * Perform modulo-2 division, a bit at a time.
+	 */
+	for (bit = 8; bit > 0; --bit)
+	{
+	    /*
+	     * Try to divide the current data bit.
+	     */
+	    if (remainder & 128)
+	    {
+		remainder = (remainder << 1) ^ PEC_POLY;
+	    }
+	    else
+	    {
+		remainder = (remainder << 1);
+	    }
+	}
+    }
+
+    /*
+     * The final remainder is the CRC result.
+     */
+    return (remainder);
+
 }
 

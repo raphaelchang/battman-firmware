@@ -6,7 +6,11 @@
 #include "datatypes.h"
 #include <string.h>
 #include <stdio.h>
-#include <stdarg.h>
+#include <chprintf.h>
+#include "memstreams.h"
+#include "config.h"
+#include "ltc6803.h"
+#include "comm_can.h"
 
 void console_process_command(char *command)
 {
@@ -55,6 +59,19 @@ void console_process_command(char *command)
         console_printf("System uptime: %d seconds\n", ST2S(chVTGetSystemTime()));
         console_printf("\r\n");
     }
+    else if (strcmp(argv[0], "cell_voltages") == 0) {
+        Config *config = config_get_configuration();
+        uint16_t *cells = ltc6803_get_cell_voltages();
+        for (uint8_t i = 0; i < config->numCells; i++)
+        {
+            console_printf("Cell %d: %fmV\n", i + 1, cells[i] * 1.5);
+        }
+        console_printf("\r\n");
+    }
+    else if (strcmp(argv[0], "infinity_current") == 0) {
+        console_printf("Current: %f\n", comm_can_get_infinity_current());
+        console_printf("\r\n");
+    }
     else
     {
         console_printf("%s: command not found\n", argv[0]);
@@ -62,18 +79,37 @@ void console_process_command(char *command)
         console_printf("\r\n");
     }
 }
-
 void console_printf(char* format, ...) {
     va_list arg;
     va_start (arg, format);
-    int len;
+    unsigned int len;
     static char print_buffer[255];
 
     print_buffer[0] = PACKET_CONSOLE;
     len = vsnprintf(print_buffer+1, 254, format, arg);
+
+    /*MemoryStream ms;*/
+    /*BaseSequentialStream *chp;*/
+    /*size_t size = 254;*/
+    /*size_t size_wo_nul;*/
+
+    /*if (size > 0)*/
+	/*size_wo_nul = size - 1;*/
+    /*else*/
+	/*size_wo_nul = 0;*/
+
+    /* Memory stream object to be used as a string writer, reserving one
+       byte for the final zero.*/
+    /*msObjectInit(&ms, (uint8_t *)(print_buffer + 1), size_wo_nul, 0);*/
+
+    /*[> Performing the print operation using the common code.<]*/
+    /*chp = (BaseSequentialStream *)(void *)&ms;*/
+    /*len = chvprintf(chp, format, arg);*/
     va_end (arg);
+    /*if (ms.eos < size)*/
+        /*print_buffer[ms.eos + 1] = 0;*/
 
     if(len > 0) {
-        packet_send_packet((unsigned char*)print_buffer, (len<254)? len+1: 255);
+        packet_send_packet((unsigned char*)print_buffer, (len<254) ? len+1: 255);
     }
 }

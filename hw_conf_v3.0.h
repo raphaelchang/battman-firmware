@@ -41,8 +41,8 @@
 #define PWR_SW_PIN 4
 #define DSG_SW_GPIO GPIOB
 #define DSG_SW_PIN 5
-#define CHG_DETECT_GPIO GPIOB
-#define CHG_DETECT_PIN 6
+#define CHG_SENSE_GPIO GPIOB
+#define CHG_SENSE_PIN 6
 
 // WS2812
 #define WS2812_SW_GPIO GPIOB

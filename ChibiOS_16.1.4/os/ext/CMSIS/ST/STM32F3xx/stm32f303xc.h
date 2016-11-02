@@ -3933,8 +3933,8 @@ typedef struct
 /******************  Bit definition for FLASH_OBR register  *******************/
 #define  FLASH_OBR_OPTERR                    ((uint32_t)0x00000001)        /*!< Option Byte Error */
 #define  FLASH_OBR_RDPRT                     ((uint32_t)0x00000006)        /*!< Read protection */
-#define  FLASH_OBR_RDPRT_1                   ((uint32_t)0x00000002)        /*!< Read protection Level 1 */
-#define  FLASH_OBR_RDPRT_2                   ((uint32_t)0x00000006)        /*!< Read protection Level 2 */
+#define  FLASH_OBR_RDPRT1                   ((uint32_t)0x00000002)        /*!< Read protection Level 1 */
+#define  FLASH_OBR_RDPRT2                   ((uint32_t)0x00000006)        /*!< Read protection Level 2 */
 
 #define  FLASH_OBR_USER                      ((uint32_t)0x00007700)        /*!< User Option Bytes */
 #define  FLASH_OBR_IWDG_SW                   ((uint32_t)0x00000100)        /*!< IWDG SW */

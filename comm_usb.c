@@ -16,6 +16,7 @@
 
 #include "hal.h"
 #include "packet.h"
+#include "hw_conf.h"
 
 /* Virtual serial port over USB.*/
 SerialUSBDriver SDU1;
@@ -162,12 +163,11 @@ static const uint8_t vcom_string1[] = {
  * Device Description string.
  */
 static const uint8_t vcom_string2[] = {
-  USB_DESC_BYTE(56),                    /* bLength.                         */
+  USB_DESC_BYTE(50),                    /* bLength.                         */
   USB_DESC_BYTE(USB_DESCRIPTOR_STRING), /* bDescriptorType.                 */
-  'C', 0, 'h', 0, 'i', 0, 'b', 0, 'i', 0, 'O', 0, 'S', 0, '/', 0,
-  'R', 0, 'T', 0, ' ', 0, 'V', 0, 'i', 0, 'r', 0, 't', 0, 'u', 0,
-  'a', 0, 'l', 0, ' ', 0, 'C', 0, 'O', 0, 'M', 0, ' ', 0, 'P', 0,
-  'o', 0, 'r', 0, 't', 0
+  'B', 0, 'a', 0, 't', 0, 't', 0, 'm', 0, 'a', 0, 'n', 0, ' ', 0,
+  'V', 0, 'i', 0, 'r', 0, 't', 0, 'u', 0, 'a', 0, 'l', 0, ' ', 0,
+  'C', 0, 'O', 0, 'M', 0, ' ', 0, 'P', 0, 'o', 0, 'r', 0, 't', 0
 };
 
 /*
@@ -176,9 +176,15 @@ static const uint8_t vcom_string2[] = {
 static const uint8_t vcom_string3[] = {
   USB_DESC_BYTE(8),                     /* bLength.                         */
   USB_DESC_BYTE(USB_DESCRIPTOR_STRING), /* bDescriptorType.                 */
-  '0' + CH_KERNEL_MAJOR, 0,
-  '0' + CH_KERNEL_MINOR, 0,
-  '0' + CH_KERNEL_PATCH, 0
+#ifdef BATTMAN_3_0
+  '0' + 3, 0,
+  '.', 0,
+  '0' + 0, 0
+#elif defined BATTMAN_4_0
+  '0' + 4, 0,
+  '.', 0,
+  '0' + 0, 0
+#endif
 };
 
 /*
@@ -405,6 +411,8 @@ void comm_usb_init(void)
     chThdSleepMilliseconds(1500);
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp)
+    
+    chMtxObjectInit(&send_mutex);
     chThdCreateStatic(serial_read_thread_wa, sizeof(serial_read_thread_wa), NORMALPRIO, serial_read_thread, NULL);
     chThdCreateStatic(serial_process_thread_wa, sizeof(serial_process_thread_wa), NORMALPRIO, serial_process_thread, NULL);
 }
@@ -413,4 +421,8 @@ void comm_usb_send(unsigned char *buffer, unsigned int len) {
     chMtxLock(&send_mutex);
     chSequentialStreamWrite(&SDU1, buffer, len);
     chMtxUnlock(&send_mutex);
+}
+
+int comm_usb_is_active(void) {
+    return SDU1.config->usbp->state == USB_ACTIVE;
 }
