@@ -11,6 +11,7 @@
 #include "ltc6803.h"
 #include "charger.h"
 #include "power.h"
+#include "config.h"
 #include "adc.h"
 #include "rtcc.h"
 #include "buzzer.h"
@@ -33,6 +34,11 @@ static THD_FUNCTION(led_update, arg) {
 
     for(;;)
     {
+        if (power_is_shutdown())
+        {
+            led_rgb_set(0);
+            break;
+        }
         if (packet_connect_event())
         {
             led_rgb_set(0x00FFFF);
@@ -70,6 +76,7 @@ int main(void) {
     halInit();
     chSysInit();
     gpio_init();
+    chThdSleepMilliseconds(1);
     config_init();
     power_init();
     adc_init();
@@ -86,13 +93,6 @@ int main(void) {
 
     while(1)
     {
-        /*if (comm_usb_is_active())*/
-        /*for (int i = 0; i < 12; i++)*/
-        /*{*/
-            /*console_printf("Cell %d: %fmV\n", i, cells[0][i] * 1.5);*/
-        /*}*/
-        /*msg_t msg = ad5272_set_resistance(277);*/
-        /*console_printf("i2c %d\n", msg);*/
         adc_update();
         ltc6803_update();
         charger_update();
@@ -101,5 +101,10 @@ int main(void) {
         rtcc_update();
         buzzer_update();
         comm_can_update();
+        if (power_is_shutdown())
+        {
+            led_rgb_set(0);
+            break;
+        }
     }
 }

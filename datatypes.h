@@ -17,6 +17,16 @@ typedef enum
     EVENT_RTCC = 0x03
 } PowerOnEvent;
 
+typedef enum
+{
+    NO_FAULT,
+    CELL_UV,
+    CELL_OV,
+    OVERCURRENT,
+    BATTERY_TEMP,
+    BOARD_TEMP
+} Fault;
+
 typedef struct
 {
     volatile uint8_t CANDeviceID;
@@ -25,6 +35,8 @@ typedef struct
     volatile float maxCurrentCutoff;
     volatile float chargeVoltage;
     volatile float chargeCurrent;
+    volatile uint16_t turnOnDelay;
+    volatile uint16_t shutdownDelay;
 } Config;
 
 #endif /* _DATATYPES_H_ */

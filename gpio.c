@@ -13,7 +13,7 @@ void gpio_init(void)
     
     palSetPadMode(PWR_SW_GPIO, PWR_SW_PIN, PAL_MODE_OUTPUT_PUSHPULL |
                         PAL_STM32_OSPEED_HIGHEST);
-    palSetPad(PWR_SW_GPIO, PWR_SW_PIN);
+    palClearPad(PWR_SW_GPIO, PWR_SW_PIN);
     
     palSetPadMode(DSG_SW_GPIO, DSG_SW_PIN, PAL_MODE_OUTPUT_PUSHPULL |
                         PAL_STM32_OSPEED_HIGHEST);

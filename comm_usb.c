@@ -348,6 +348,7 @@ static int serial_rx_read_pos = 0;
 static int serial_rx_write_pos = 0;
 static THD_WORKING_AREA(serial_read_thread_wa, 512);
 static THD_WORKING_AREA(serial_process_thread_wa, 4096);
+static THD_WORKING_AREA(serial_init_thread_wa, 256);
 static mutex_t send_mutex;
 static thread_t *process_tp;
 
@@ -402,8 +403,7 @@ static THD_FUNCTION(serial_process_thread, arg) {
     }
 }
 
-void comm_usb_init(void)
-{
+static THD_FUNCTION(serial_init_thread, arg) {
     sduObjectInit(&SDU1);
     sduStart(&SDU1, &serusbcfg);
 
@@ -415,6 +415,11 @@ void comm_usb_init(void)
     chMtxObjectInit(&send_mutex);
     chThdCreateStatic(serial_read_thread_wa, sizeof(serial_read_thread_wa), NORMALPRIO, serial_read_thread, NULL);
     chThdCreateStatic(serial_process_thread_wa, sizeof(serial_process_thread_wa), NORMALPRIO, serial_process_thread, NULL);
+}
+
+void comm_usb_init(void)
+{
+    chThdCreateStatic(serial_init_thread_wa, sizeof(serial_init_thread_wa), NORMALPRIO, serial_init_thread, NULL);
 }
 
 void comm_usb_send(unsigned char *buffer, unsigned int len) {

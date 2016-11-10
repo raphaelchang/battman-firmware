@@ -19,8 +19,10 @@ void config_init(void)
     config.numCells = 6;
     config.lowVoltageCutoff = 3.2;
     config.maxCurrentCutoff = 150.0;
-    config.chargeVoltage = 25.2;
+    config.chargeVoltage = 23.0;
     config.chargeCurrent = 3.0;
+    config.turnOnDelay = 250;
+    config.shutdownDelay = 500;
 
     memset(VirtAddVarTab, 0, sizeof(VirtAddVarTab));
 
