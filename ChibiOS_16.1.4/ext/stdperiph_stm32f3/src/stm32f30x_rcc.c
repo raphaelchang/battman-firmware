@@ -57,6 +57,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f30x_rcc.h"
 
+#ifndef assert_param
+#define assert_param(expr) ((void)0)
+#endif
+
 /** @addtogroup STM32F30x_StdPeriph_Driver
   * @{
   */
@@ -434,7 +438,7 @@ void RCC_PLLConfig(uint32_t RCC_PLLSource, uint32_t RCC_PLLMul)
   assert_param(IS_RCC_PLL_MUL(RCC_PLLMul));
   
   /* Clear PLL Source [16] and Multiplier [21:18] bits */
-  RCC->CFGR &= ~(RCC_CFGR_PLLMULL | RCC_CFGR_PLLSRC);
+  RCC->CFGR &= ~(RCC_CFGR_PLLMUL | RCC_CFGR_PLLSRC);
 
   /* Set the PLL Source and Multiplier */
   RCC->CFGR |= (uint32_t)(RCC_PLLSource | RCC_PLLMul);
@@ -475,7 +479,7 @@ void RCC_PREDIV1Config(uint32_t RCC_PREDIV1_Div)
 
   tmpreg = RCC->CFGR2;
   /* Clear PREDIV1[3:0] bits */
-  tmpreg &= ~(RCC_CFGR2_PREDIV1);
+  tmpreg &= ~(RCC_CFGR2_PREDIV);
 
   /* Set the PREDIV1 division factor */
   tmpreg |= RCC_PREDIV1_Div;
@@ -867,7 +871,7 @@ void RCC_GetClocksFreq(RCC_ClocksTypeDef* RCC_Clocks)
       break;
     case 0x08:  /* PLL used as system clock */
       /* Get PLL clock source and multiplication factor ----------------------*/
-      pllmull = RCC->CFGR & RCC_CFGR_PLLMULL;
+      pllmull = RCC->CFGR & RCC_CFGR_PLLMUL;
       pllsource = RCC->CFGR & RCC_CFGR_PLLSRC;
       pllmull = ( pllmull >> 18) + 2;
       
@@ -878,7 +882,7 @@ void RCC_GetClocksFreq(RCC_ClocksTypeDef* RCC_Clocks)
       }
       else
       {
-        prediv1factor = (RCC->CFGR2 & RCC_CFGR2_PREDIV1) + 1;
+        prediv1factor = (RCC->CFGR2 & RCC_CFGR2_PREDIV) + 1;
         /* HSE oscillator clock selected as PREDIV1 clock entry */
         pllclk = (HSE_VALUE / prediv1factor) * pllmull; 
       }

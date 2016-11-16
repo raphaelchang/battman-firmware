@@ -4837,18 +4837,27 @@ typedef struct
 #define  RCC_CFGR3_I2CSW                     ((uint32_t)0x00000030)        /*!< I2CSW bits */
 #define  RCC_CFGR3_I2C1SW                    ((uint32_t)0x00000010)        /*!< I2C1SW bits */
 #define  RCC_CFGR3_I2C2SW                    ((uint32_t)0x00000020)        /*!< I2C2SW bits */
+#define  RCC_CFGR3_I2C3SW                    ((uint32_t)0x00000040)        /*!< I2C3SW bits */
 
 #define  RCC_CFGR3_I2C1SW_HSI                ((uint32_t)0x00000000)        /*!< HSI oscillator clock used as I2C1 clock source */
 #define  RCC_CFGR3_I2C1SW_SYSCLK             ((uint32_t)0x00000010)        /*!< System clock selected as I2C1 clock source */
 #define  RCC_CFGR3_I2C2SW_HSI                ((uint32_t)0x00000000)        /*!< HSI oscillator clock used as I2C2 clock source */
 #define  RCC_CFGR3_I2C2SW_SYSCLK             ((uint32_t)0x00000020)        /*!< System clock selected as I2C2 clock source */
-#define  RCC_CFGR3_TIMSW                     ((uint32_t)0x00000300)        /*!< TIMSW bits */
-#define  RCC_CFGR3_TIM1SW                    ((uint32_t)0x00000100)        /*!< TIM1SW bits */
+#define  RCC_CFGR3_TIMSW                     ((uint32_t)0x00002F00)        /*!< TIMSW bits */
+#define  RCC_CFGR3_TIM1SW                    ((uint32_t)0x00000100)        /*!< TIM1SW bits */ 
 #define  RCC_CFGR3_TIM8SW                    ((uint32_t)0x00000200)        /*!< TIM8SW bits */
+#define  RCC_CFGR3_TIM15SW                   ((uint32_t)0x00000400)        /*!< TIM15SW bits */
+#define  RCC_CFGR3_TIM16SW                   ((uint32_t)0x00000800)        /*!< TIM16SW bits */
+#define  RCC_CFGR3_TIM17SW                   ((uint32_t)0x00002000)        /*!< TIM17SW bits */
+#define  RCC_CFGR3_TIM20SW                   ((uint32_t)0x00008000)        /*!< TIM20SW bits */
+#define  RCC_CFGR3_TIM2SW                    ((uint32_t)0x01000000)        /*!< TIM3SW bits */
+#define  RCC_CFGR3_TIM3SW                    ((uint32_t)0x02000000)        /*!< TIM2SW bits */
 #define  RCC_CFGR3_TIM1SW_HCLK               ((uint32_t)0x00000000)        /*!< HCLK used as TIM1 clock source */
 #define  RCC_CFGR3_TIM1SW_PLL                ((uint32_t)0x00000100)        /*!< PLL clock used as TIM1 clock source */
 #define  RCC_CFGR3_TIM8SW_HCLK               ((uint32_t)0x00000000)        /*!< HCLK used as TIM8 clock source */
 #define  RCC_CFGR3_TIM8SW_PLL                ((uint32_t)0x00000200)        /*!< PLL clock used as TIM8 clock source */
+
+#define  RCC_CFGR3_HRTIM1SW                  ((uint32_t)0x00001000)        /*!< HRTIM1SW bits */
 
 #define  RCC_CFGR3_USART2SW                  ((uint32_t)0x00030000)        /*!< USART2SW[1:0] bits */
 #define  RCC_CFGR3_USART2SW_0                ((uint32_t)0x00010000)        /*!< Bit 0 */

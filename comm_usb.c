@@ -184,6 +184,10 @@ static const uint8_t vcom_string3[] = {
   '0' + 4, 0,
   '.', 0,
   '0' + 0, 0
+#elif defined BATTMAN_4_1
+  '0' + 4, 0,
+  '.', 0,
+  '0' + 1, 0
 #endif
 };
 

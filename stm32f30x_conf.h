@@ -4,6 +4,8 @@
 #define USE_RTOS	0
 
 #include "stm32f30x_flash.h"
+#include "stm32f30x_tim.h"
+#include "stm32f30x_rcc.h"
 
 #ifdef  USE_FULL_ASSERT
 #define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))

@@ -12,11 +12,13 @@
 #include "charger.h"
 #include "power.h"
 #include "config.h"
+#include "current_monitor.h"
 #include "adc.h"
 #include "rtcc.h"
 #include "buzzer.h"
 #include "packet.h"
 #include "console.h"
+#include "accessory.h"
 
 static const I2CConfig i2cconfig = {
     STM32_TIMINGR_PRESC(15U) |
@@ -70,6 +72,54 @@ static THD_FUNCTION(led_update, arg) {
         }
     }
 }
+static THD_WORKING_AREA(buzzer_update_wa, 1024);
+static THD_FUNCTION(buzzer_update, arg) {
+    (void)arg;
+
+    chRegSetThreadName("Buzzer update");
+
+    for(;;)
+    {
+        for (int i = 100; i < 4000; i+=5)
+        {
+            buzzer_set_frequency(i);
+            chThdSleepMilliseconds(1);
+        }
+        /*buzzer_play_rest(200);*/
+        /*buzzer_play_note(NOTE_G4, 290);*/
+        /*buzzer_play_rest(10);*/
+        /*buzzer_play_note(NOTE_G4, 100);*/
+        /*buzzer_play_note(NOTE_A4, 400);*/
+        /*buzzer_play_note(NOTE_G4, 400);*/
+        /*buzzer_play_note(NOTE_C5, 400);*/
+        /*buzzer_play_note(NOTE_B4, 800);*/
+
+        /*buzzer_play_note(NOTE_G4, 290);*/
+        /*buzzer_play_rest(10);*/
+        /*buzzer_play_note(NOTE_G4, 100);*/
+        /*buzzer_play_note(NOTE_A4, 400);*/
+        /*buzzer_play_note(NOTE_G4, 400);*/
+        /*buzzer_play_note(NOTE_D5, 400);*/
+        /*buzzer_play_note(NOTE_C5, 800);*/
+
+        /*buzzer_play_note(NOTE_G4, 290);*/
+        /*buzzer_play_rest(10);*/
+        /*buzzer_play_note(NOTE_G4, 100);*/
+        /*buzzer_play_note(NOTE_G5, 400);*/
+        /*buzzer_play_note(NOTE_E5, 400);*/
+        /*buzzer_play_note(NOTE_C5, 400);*/
+        /*buzzer_play_note(NOTE_B4, 400);*/
+        /*buzzer_play_note(NOTE_A4, 800);*/
+
+        /*buzzer_play_note(NOTE_F5, 290);*/
+        /*buzzer_play_rest(10);*/
+        /*buzzer_play_note(NOTE_F5, 100);*/
+        /*buzzer_play_note(NOTE_E5, 400);*/
+        /*buzzer_play_note(NOTE_C5, 400);*/
+        /*buzzer_play_note(NOTE_D5, 400);*/
+        /*buzzer_play_note(NOTE_C5, 800);*/
+    }
+}
 
 int main(void) {
 
@@ -85,8 +135,10 @@ int main(void) {
     charger_init();
     current_monitor_init();
     rtcc_init();
-    buzzer_init();
+    accessory_init();
     comm_can_init();
+    buzzer_init();
+    chThdCreateStatic(buzzer_update_wa, sizeof(buzzer_update_wa), NORMALPRIO, buzzer_update, NULL);
     led_rgb_init();
     chThdCreateStatic(led_update_wa, sizeof(led_update_wa), NORMALPRIO, led_update, NULL);
     comm_usb_init();
@@ -99,7 +151,7 @@ int main(void) {
         current_monitor_update();
         power_update();
         rtcc_update();
-        buzzer_update();
+        accessory_update();
         comm_can_update();
         if (power_is_shutdown())
         {

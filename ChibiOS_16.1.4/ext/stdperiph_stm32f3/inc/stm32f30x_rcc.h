@@ -35,7 +35,7 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f30x.h"
+#include "stm32f3xx.h"
 
 /** @addtogroup STM32F30x_StdPeriph_Driver
   * @{
@@ -91,15 +91,56 @@ typedef struct
                          ((HSE) == RCC_HSE_Bypass))
 
 /**
+ *  * @brief In the following line adjust the value of External High Speed oscillator (HSE)
+ *     used in your application 
+ *        
+ *           Tip: To avoid modifying this file each time you need to use different HSE, you
+ *                   can define the HSE value in your toolchain compiler preprocessor.
+ *                     */           
+#if !defined  (HSE_VALUE) 
+ #define HSE_VALUE            ((uint32_t)8000000) /*!< Value of the External oscillator in Hz */
+#endif /* HSE_VALUE */
+
+/**
+ *  * @brief In the following line adjust the External High Speed oscillator (HSE) Startup 
+ *     Timeout value 
+ *        */
+#if !defined  (HSE_STARTUP_TIMEOUT) 
+ #define HSE_STARTUP_TIMEOUT  ((uint16_t)0x5000)   /*!< Time out for HSE start up */
+#endif /* HSE_STARTUP_TIMEOUT */
+
+/**
+ *  * @brief In the following line adjust the Internal High Speed oscillator (HSI) Startup 
+ *     Timeout value 
+ *        */
+#if !defined  (HSI_STARTUP_TIMEOUT) 
+ #define HSI_STARTUP_TIMEOUT   ((uint16_t)0x5000) /*!< Time out for HSI start up */
+#endif /* HSI_STARTUP_TIMEOUT */  
+
+#if !defined  (HSI_VALUE) 
+ #define HSI_VALUE  ((uint32_t)8000000)
+#endif /* HSI_VALUE */                      /*!< Value of the Internal High Speed oscillator in Hz.
+                                                                                          The real value may vary depending on the variations
+                                                                                                                                       in voltage and temperature.  */
+#if !defined  (LSI_VALUE) 
+ #define LSI_VALUE  ((uint32_t)40000)    
+#endif /* LSI_VALUE */                      /*!< Value of the Internal Low Speed oscillator in Hz
+                                                                                           The real value may vary depending on the variations
+                                                                                                                                        in voltage and temperature.  */
+#if !defined  (LSE_VALUE)
+ #define LSE_VALUE  ((uint32_t)32768)    /*!< Value of the External Low Speed oscillator in Hz */
+#endif /* LSE_VALUE */     
+
+/**
   * @}
   */ 
  
 /** @defgroup RCC_PLL_Clock_Source 
   * @{
   */
-#define RCC_PLLSource_HSI                RCC_CFGR_PLLSRC_HSI_PREDIV     /*!< Only applicable for STM32F303xE devices */
-#define RCC_PLLSource_HSI_Div2           RCC_CFGR_PLLSRC_HSI_Div2
-#define RCC_PLLSource_PREDIV1            RCC_CFGR_PLLSRC_PREDIV1
+#define RCC_PLLSource_HSI                RCC_CFGR_PLLSRC_HSI_DIV2     //[>!< Only applicable for STM32F303xE devices <]
+#define RCC_PLLSource_HSI_Div2           RCC_CFGR_PLLSRC_HSI_DIV2 
+#define RCC_PLLSource_PREDIV1            RCC_CFGR_PLLSRC_HSE_PREDIV 
  
 #define IS_RCC_PLL_SOURCE(SOURCE) (((SOURCE) == RCC_PLLSource_HSI_Div2) || \
                                    ((SOURCE) == RCC_PLLSource_PREDIV1)|| \
@@ -113,21 +154,21 @@ typedef struct
   * @{
   */
 
-#define RCC_PLLMul_2                    RCC_CFGR_PLLMULL2
-#define RCC_PLLMul_3                    RCC_CFGR_PLLMULL3
-#define RCC_PLLMul_4                    RCC_CFGR_PLLMULL4
-#define RCC_PLLMul_5                    RCC_CFGR_PLLMULL5
-#define RCC_PLLMul_6                    RCC_CFGR_PLLMULL6
-#define RCC_PLLMul_7                    RCC_CFGR_PLLMULL7
-#define RCC_PLLMul_8                    RCC_CFGR_PLLMULL8
-#define RCC_PLLMul_9                    RCC_CFGR_PLLMULL9
-#define RCC_PLLMul_10                   RCC_CFGR_PLLMULL10
-#define RCC_PLLMul_11                   RCC_CFGR_PLLMULL11
-#define RCC_PLLMul_12                   RCC_CFGR_PLLMULL12
-#define RCC_PLLMul_13                   RCC_CFGR_PLLMULL13
-#define RCC_PLLMul_14                   RCC_CFGR_PLLMULL14
-#define RCC_PLLMul_15                   RCC_CFGR_PLLMULL15
-#define RCC_PLLMul_16                   RCC_CFGR_PLLMULL16
+#define RCC_PLLMul_2                    RCC_CFGR_PLLMUL2
+#define RCC_PLLMul_3                    RCC_CFGR_PLLMUL3
+#define RCC_PLLMul_4                    RCC_CFGR_PLLMUL4
+#define RCC_PLLMul_5                    RCC_CFGR_PLLMUL5
+#define RCC_PLLMul_6                    RCC_CFGR_PLLMUL6
+#define RCC_PLLMul_7                    RCC_CFGR_PLLMUL7
+#define RCC_PLLMul_8                    RCC_CFGR_PLLMUL8
+#define RCC_PLLMul_9                    RCC_CFGR_PLLMUL9
+#define RCC_PLLMul_10                   RCC_CFGR_PLLMUL10
+#define RCC_PLLMul_11                   RCC_CFGR_PLLMUL11
+#define RCC_PLLMul_12                   RCC_CFGR_PLLMUL12
+#define RCC_PLLMul_13                   RCC_CFGR_PLLMUL13
+#define RCC_PLLMul_14                   RCC_CFGR_PLLMUL14
+#define RCC_PLLMul_15                   RCC_CFGR_PLLMUL15
+#define RCC_PLLMul_16                   RCC_CFGR_PLLMUL16
 #define IS_RCC_PLL_MUL(MUL) (((MUL) == RCC_PLLMul_2) || ((MUL) == RCC_PLLMul_3)   || \
                              ((MUL) == RCC_PLLMul_4) || ((MUL) == RCC_PLLMul_5)   || \
                              ((MUL) == RCC_PLLMul_6) || ((MUL) == RCC_PLLMul_7)   || \
@@ -143,22 +184,22 @@ typedef struct
 /** @defgroup RCC_PREDIV1_division_factor
   * @{
   */
-#define  RCC_PREDIV1_Div1               RCC_CFGR2_PREDIV1_DIV1
-#define  RCC_PREDIV1_Div2               RCC_CFGR2_PREDIV1_DIV2
-#define  RCC_PREDIV1_Div3               RCC_CFGR2_PREDIV1_DIV3
-#define  RCC_PREDIV1_Div4               RCC_CFGR2_PREDIV1_DIV4
-#define  RCC_PREDIV1_Div5               RCC_CFGR2_PREDIV1_DIV5
-#define  RCC_PREDIV1_Div6               RCC_CFGR2_PREDIV1_DIV6
-#define  RCC_PREDIV1_Div7               RCC_CFGR2_PREDIV1_DIV7
-#define  RCC_PREDIV1_Div8               RCC_CFGR2_PREDIV1_DIV8
-#define  RCC_PREDIV1_Div9               RCC_CFGR2_PREDIV1_DIV9
-#define  RCC_PREDIV1_Div10              RCC_CFGR2_PREDIV1_DIV10
-#define  RCC_PREDIV1_Div11              RCC_CFGR2_PREDIV1_DIV11
-#define  RCC_PREDIV1_Div12              RCC_CFGR2_PREDIV1_DIV12
-#define  RCC_PREDIV1_Div13              RCC_CFGR2_PREDIV1_DIV13
-#define  RCC_PREDIV1_Div14              RCC_CFGR2_PREDIV1_DIV14
-#define  RCC_PREDIV1_Div15              RCC_CFGR2_PREDIV1_DIV15
-#define  RCC_PREDIV1_Div16              RCC_CFGR2_PREDIV1_DIV16
+#define  RCC_PREDIV1_Div1               RCC_CFGR2_PREDIV_DIV1
+#define  RCC_PREDIV1_Div2               RCC_CFGR2_PREDIV_DIV2
+#define  RCC_PREDIV1_Div3               RCC_CFGR2_PREDIV_DIV3
+#define  RCC_PREDIV1_Div4               RCC_CFGR2_PREDIV_DIV4
+#define  RCC_PREDIV1_Div5               RCC_CFGR2_PREDIV_DIV5
+#define  RCC_PREDIV1_Div6               RCC_CFGR2_PREDIV_DIV6
+#define  RCC_PREDIV1_Div7               RCC_CFGR2_PREDIV_DIV7
+#define  RCC_PREDIV1_Div8               RCC_CFGR2_PREDIV_DIV8
+#define  RCC_PREDIV1_Div9               RCC_CFGR2_PREDIV_DIV9
+#define  RCC_PREDIV1_Div10              RCC_CFGR2_PREDIV_DIV10
+#define  RCC_PREDIV1_Div11              RCC_CFGR2_PREDIV_DIV11
+#define  RCC_PREDIV1_Div12              RCC_CFGR2_PREDIV_DIV12
+#define  RCC_PREDIV1_Div13              RCC_CFGR2_PREDIV_DIV13
+#define  RCC_PREDIV1_Div14              RCC_CFGR2_PREDIV_DIV14
+#define  RCC_PREDIV1_Div15              RCC_CFGR2_PREDIV_DIV15
+#define  RCC_PREDIV1_Div16              RCC_CFGR2_PREDIV_DIV16
 
 #define IS_RCC_PREDIV1(PREDIV1) (((PREDIV1) == RCC_PREDIV1_Div1) || ((PREDIV1) == RCC_PREDIV1_Div2) || \
                                  ((PREDIV1) == RCC_PREDIV1_Div3) || ((PREDIV1) == RCC_PREDIV1_Div4) || \

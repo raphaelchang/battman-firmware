@@ -120,6 +120,10 @@
 #include "stm32f30x_tim.h"
 #include "stm32f30x_rcc.h"
 
+#ifndef assert_param
+#define assert_param(expr) ((void)0)
+#endif
+
 /** @addtogroup STM32F30x_StdPeriph_Driver
   * @{
   */
@@ -246,18 +250,13 @@ void TIM_DeInit(TIM_TypeDef* TIMx)
     RCC_APB2PeriphResetCmd(RCC_APB2Periph_TIM16, ENABLE);
     RCC_APB2PeriphResetCmd(RCC_APB2Periph_TIM16, DISABLE);  
   } 
-  else if (TIMx == TIM17) 
-  {     
-    RCC_APB2PeriphResetCmd(RCC_APB2Periph_TIM17, ENABLE);
-    RCC_APB2PeriphResetCmd(RCC_APB2Periph_TIM17, DISABLE); 
-  }    
   else
-  { 
-    if (TIMx == TIM20) 
-    {     
-      RCC_APB2PeriphResetCmd(RCC_APB2Periph_TIM20, ENABLE);
-      RCC_APB2PeriphResetCmd(RCC_APB2Periph_TIM20, DISABLE); 
-    }   
+  {
+      if (TIMx == TIM17) 
+      {     
+        RCC_APB2PeriphResetCmd(RCC_APB2Periph_TIM17, ENABLE);
+        RCC_APB2PeriphResetCmd(RCC_APB2Periph_TIM17, DISABLE); 
+      }    
   }
 }
 
@@ -281,7 +280,7 @@ void TIM_TimeBaseInit(TIM_TypeDef* TIMx, TIM_TimeBaseInitTypeDef* TIM_TimeBaseIn
   tmpcr1 = TIMx->CR1;  
 
   if((TIMx == TIM1) || (TIMx == TIM8)|| (TIMx == TIM2) || 
-     (TIMx == TIM3) || (TIMx == TIM4) || (TIMx == TIM20)) 
+     (TIMx == TIM3) || (TIMx == TIM4))
   {
     /* Select the Counter Mode */
     tmpcr1 &= (uint16_t)(~(TIM_CR1_DIR | TIM_CR1_CMS));
@@ -304,7 +303,7 @@ void TIM_TimeBaseInit(TIM_TypeDef* TIMx, TIM_TimeBaseInitTypeDef* TIM_TimeBaseIn
   TIMx->PSC = TIM_TimeBaseInitStruct->TIM_Prescaler;
     
   if ((TIMx == TIM1) || (TIMx == TIM8)|| (TIMx == TIM15) || 
-      (TIMx == TIM16) || (TIMx == TIM17)|| (TIMx == TIM20))  
+      (TIMx == TIM16) || (TIMx == TIM17))
   {
     /* Set the Repetition Counter value */
     TIMx->RCR = TIM_TimeBaseInitStruct->TIM_RepetitionCounter;
