@@ -6,6 +6,9 @@
 
 void ltc6803_init(void);
 void ltc6803_update(void);
-uint16_t* ltc6803_get_cell_voltages(void);
+float* ltc6803_get_cell_voltages(void);
+void ltc6803_enable_balance(uint8_t cell);
+void ltc6803_disable_balance(uint8_t cell);
+void ltc6803_disable_balance_all(void);
 
 #endif /* _LTC6803_H_ */

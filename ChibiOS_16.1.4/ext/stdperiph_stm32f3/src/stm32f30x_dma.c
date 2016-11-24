@@ -73,6 +73,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f30x_dma.h"
 
+#ifndef assert_param
+#define assert_param(expr) ((void)0)
+#endif
+
 /** @addtogroup STM32F30x_StdPeriph_Driver
   * @{
   */

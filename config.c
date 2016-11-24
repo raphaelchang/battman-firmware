@@ -16,13 +16,21 @@ static volatile Config config;
 void config_init(void)
 {
     config.CANDeviceID = 0x01;
-    config.numCells = 6;
-    config.lowVoltageCutoff = 3.2;
-    config.maxCurrentCutoff = 150.0;
-    config.chargeVoltage = 23.0;
-    config.chargeCurrent = 3.0;
+    config.numCells = 12;
+    config.lowVoltageCutoff = 2.8;
+    config.highVoltageCutoff = 3.65;
+    config.maxCurrentCutoff = 120.0;
+    config.chargeVoltage = 43.2;
+    config.chargeCurrent = 2.0;
     config.turnOnDelay = 200;
     config.shutdownDelay = 500;
+    config.chargeMode = CURRENT_CONTROL;
+    config.chargeCurrentGain_P = 0.1;
+    config.chargeCurrentGain_I = 1.0;
+    config.prechargeTimeout = 500;
+    config.balanceStartVoltage = 3.5;
+    config.balanceDifferenceThreshold = 0.01;
+    config.chargerDisconnectShutdown = true;
 
     memset(VirtAddVarTab, 0, sizeof(VirtAddVarTab));
 

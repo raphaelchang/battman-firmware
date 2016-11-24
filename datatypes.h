@@ -6,7 +6,8 @@
 typedef enum
 {
     PACKET_CONNECT = 0x00,
-    PACKET_CONSOLE = 0x01
+    PACKET_CONSOLE = 0x01,
+    PACKET_GET_DATA = 0x02
 } PacketID;
 
 typedef enum
@@ -19,24 +20,60 @@ typedef enum
 
 typedef enum
 {
-    NO_FAULT,
-    CELL_UV,
-    CELL_OV,
-    OVERCURRENT,
-    BATTERY_TEMP,
-    BOARD_TEMP
+    FAULT_NONE = 0x00,
+    FAULT_CELL_UV = 0x01,
+    FAULT_CELL_OV = 0x02,
+    FAULT_OVERCURRENT = 0x04,
+    FAULT_BATTERY_TEMP = 0x08,
+    FAULT_BOARD_TEMP = 0x10,
+    FAULT_TURN_ON_SHORT = 0x20
 } Fault;
+
+typedef enum
+{
+    WARNING_NONE = 0x00,
+    WARNING_CELL_LOW = 0x01,
+    WARNING_CELL_HIGH = 0x02,
+    WARNING_OVERCURRENT = 0x04,
+    WARNING_BATTERY_TEMP = 0x08
+} Warning;
+
+typedef enum
+{
+    CURRENT_CONTROL,
+    FULL_CURRENT,
+    BYPASS_CC,
+    BYPASS_CCCV
+} ChargeMode;
 
 typedef struct
 {
     volatile uint8_t CANDeviceID;
     volatile uint8_t numCells;
     volatile float lowVoltageCutoff;
+    volatile float highVoltageCutoff;
     volatile float maxCurrentCutoff;
     volatile float chargeVoltage;
     volatile float chargeCurrent;
     volatile uint16_t turnOnDelay;
     volatile uint16_t shutdownDelay;
+    volatile ChargeMode chargeMode;
+    volatile float chargeCurrentGain_P;
+    volatile float chargeCurrentGain_I;
+    volatile uint16_t prechargeTimeout;
+    volatile float balanceStartVoltage;
+    volatile float balanceDifferenceThreshold;
+    volatile bool chargerDisconnectShutdown;
 } Config;
+
+typedef struct
+{
+    uint8_t second;
+    uint8_t minute;
+    uint8_t hour;
+    uint8_t day;
+    uint8_t month;
+    uint8_t year;
+} Time;
 
 #endif /* _DATATYPES_H_ */

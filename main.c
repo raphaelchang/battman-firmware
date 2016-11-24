@@ -13,12 +13,13 @@
 #include "power.h"
 #include "config.h"
 #include "current_monitor.h"
-#include "adc.h"
+#include "analog.h"
 #include "rtcc.h"
 #include "buzzer.h"
+#include "accessory.h"
+#include "faults.h"
 #include "packet.h"
 #include "console.h"
-#include "accessory.h"
 
 static const I2CConfig i2cconfig = {
     STM32_TIMINGR_PRESC(15U) |
@@ -41,6 +42,9 @@ static THD_FUNCTION(led_update, arg) {
             led_rgb_set(0);
             break;
         }
+        uint16_t blinkTime = 500;
+        if (comm_usb_is_active())
+            blinkTime = 250;
         if (packet_connect_event())
         {
             led_rgb_set(0x00FFFF);
@@ -56,19 +60,40 @@ static THD_FUNCTION(led_update, arg) {
             led_rgb_set(0);
             chThdSleepMilliseconds(100);
         }
-        else if (comm_usb_is_active())
+        else if (power_get_power_on_event() == EVENT_RTCC)
         {
-            led_rgb_set(0x00FF00);
-            chThdSleepMilliseconds(250);
+            led_rgb_set(0xFF0055);
+            chThdSleepMilliseconds(50);
             led_rgb_set(0);
-            chThdSleepMilliseconds(250);
+            chThdSleepMilliseconds(150);
+        }
+        else if (faults_get_faults() != FAULT_NONE)
+        {
+            led_rgb_set(0xFF0000);
+            chThdSleepMilliseconds(200);
+            led_rgb_set(0);
+            chThdSleepMilliseconds(200);
+        }
+        else if (charger_is_balancing())
+        {
+            led_rgb_set(0x0000FF);
+            chThdSleepMilliseconds(blinkTime);
+            led_rgb_set(0);
+            chThdSleepMilliseconds(blinkTime);
+        }
+        else if (charger_is_charging())
+        {
+            led_rgb_set(0xFF2200);
+            chThdSleepMilliseconds(blinkTime);
+            led_rgb_set(0);
+            chThdSleepMilliseconds(blinkTime);
         }
         else
         {
             led_rgb_set(0x00FF00);
-            chThdSleepMilliseconds(500);
+            chThdSleepMilliseconds(blinkTime);
             led_rgb_set(0);
-            chThdSleepMilliseconds(500);
+            chThdSleepMilliseconds(blinkTime);
         }
     }
 }
@@ -78,8 +103,21 @@ static THD_FUNCTION(buzzer_update, arg) {
 
     chRegSetThreadName("Buzzer update");
 
+    /*for (int i = 100; i < 4000; i+=5)*/
+    /*{*/
+        /*buzzer_set_frequency(i);*/
+        /*chThdSleepMilliseconds(1);*/
+    /*}*/
     for(;;)
     {
+        if (power_is_shutdown())
+        {
+            buzzer_set_frequency(0);
+            break;
+        }
+        buzzer_set_frequency(0);
+        chThdSleepMilliseconds(100);
+        continue;
         for (int i = 100; i < 4000; i+=5)
         {
             buzzer_set_frequency(i);
@@ -128,8 +166,8 @@ int main(void) {
     gpio_init();
     chThdSleepMilliseconds(1);
     config_init();
+    analog_init();
     power_init();
-    adc_init();
     i2cStart(&I2C_DEV, &i2cconfig);
     ltc6803_init();
     charger_init();
@@ -145,10 +183,10 @@ int main(void) {
 
     while(1)
     {
-        adc_update();
+        analog_update();
         ltc6803_update();
-        charger_update();
         current_monitor_update();
+        charger_update();
         power_update();
         rtcc_update();
         accessory_update();
@@ -156,6 +194,7 @@ int main(void) {
         if (power_is_shutdown())
         {
             led_rgb_set(0);
+            buzzer_set_frequency(0);
             break;
         }
     }

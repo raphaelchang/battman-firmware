@@ -1,6 +1,11 @@
 #include "power.h"
 #include "hw_conf.h"
+#include "analog.h"
+#include "current_monitor.h"
 #include "config.h"
+#include "charger.h"
+#include "rtcc.h"
+#include "faults.h"
 
 static volatile bool discharge_enabled = false;
 static volatile bool precharged = false;
@@ -16,9 +21,10 @@ void power_init(void)
 {
     config = config_get_configuration();
     palClearPad(DSG_SW_GPIO, DSG_SW_PIN);
+    palClearPad(PCHG_SW_GPIO, PCHG_SW_PIN);
     if (!palReadPad(PWR_BTN_GPIO, PWR_BTN_PIN))
         power_on_event = EVENT_SWITCH;
-    else if (palReadPad(CHG_SENSE_GPIO, CHG_SENSE_PIN))
+    else if (analog_charger_input_voltage() > 6.0)
         power_on_event = EVENT_CHARGER;
 #ifdef BATTMAN_4_1
     else if (!palReadPad(RTCC_INT_GPIO, RTCC_INT_PIN))
@@ -31,14 +37,15 @@ void power_init(void)
         chThdSleepMilliseconds(config->turnOnDelay);
         discharge_enabled = true;
     }
-    palSetPad(PWR_SW_GPIO, PWR_SW_PIN);
+    if (power_on_event != EVENT_USB)
+        palSetPad(PWR_SW_GPIO, PWR_SW_PIN);
 }
 
 void power_update(void)
 {
-    if (!shutdown)
+    if (!shutdown && power_on_event != EVENT_USB)
         palSetPad(PWR_SW_GPIO, PWR_SW_PIN);
-    if (discharge_enabled)
+    if (discharge_enabled && faults_get_faults() == FAULT_NONE)
     {
         if (!precharged)
         {
@@ -47,7 +54,17 @@ void power_update(void)
         }
         if (precharged)
         {
-            if (ST2MS(chVTTimeElapsedSinceX(prechargeStartTime)) > 1000)
+            if (ST2MS(chVTTimeElapsedSinceX(prechargeStartTime)) > 8)
+            {
+                if (analog_discharge_voltage() < 0.5) // Turned on into short
+                {
+                    palClearPad(DSG_SW_GPIO, DSG_SW_PIN);
+                    palClearPad(PCHG_SW_GPIO, PCHG_SW_PIN);
+                    faults_set_fault(FAULT_TURN_ON_SHORT);
+                    return;
+                }
+            }
+            if (analog_discharge_voltage() >= current_monitor_get_bus_voltage() - 5.0 || ST2MS(chVTTimeElapsedSinceX(prechargeStartTime)) > config->prechargeTimeout)
             {
                 palSetPad(DSG_SW_GPIO, DSG_SW_PIN);
                 palClearPad(PCHG_SW_GPIO, PCHG_SW_PIN);
@@ -68,10 +85,18 @@ void power_update(void)
     {
         palClearPad(DSG_SW_GPIO, DSG_SW_PIN);
         palClearPad(PCHG_SW_GPIO, PCHG_SW_PIN);
+        precharged = false;
     }
     if (palReadPad(PWR_BTN_GPIO, PWR_BTN_PIN))
         power_button_released = true;
-    if ((!palReadPad(PWR_BTN_GPIO, PWR_BTN_PIN) && power_button_released))
+    if (shutdown || (config->chargerDisconnectShutdown && power_on_event == EVENT_CHARGER && analog_charger_input_voltage() < 6.0))
+    {
+        shutdown = true;
+        rtcc_enable_alarm();
+        palClearPad(DSG_SW_GPIO, DSG_SW_PIN);
+        palClearPad(PWR_SW_GPIO, PWR_SW_PIN);
+    }
+    else if (((!palReadPad(PWR_BTN_GPIO, PWR_BTN_PIN) && power_button_released) && analog_charger_input_voltage() < 6.0 && power_on_event != EVENT_USB) || power_on_event == EVENT_RTCC)
     {
         if (!shutdownStarted)
         {
@@ -80,22 +105,17 @@ void power_update(void)
         }
         if (ST2MS(chVTTimeElapsedSinceX(shutdownStartTime)) > config->shutdownDelay)
         {
+            rtcc_enable_alarm();
             palClearPad(DSG_SW_GPIO, DSG_SW_PIN);
             palClearPad(PWR_SW_GPIO, PWR_SW_PIN);
             shutdown = true;
         }
-    }
-    else if (shutdown)
-    {
-        palClearPad(DSG_SW_GPIO, DSG_SW_PIN);
-        palClearPad(PWR_SW_GPIO, PWR_SW_PIN);
     }
     else
     {
         shutdown = false;
         shutdownStarted = false;
     }
-    // Check for faults
 }
 
 void power_enable_discharge(void)

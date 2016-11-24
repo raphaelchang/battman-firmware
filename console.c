@@ -10,6 +10,9 @@
 #include "memstreams.h"
 #include "config.h"
 #include "ltc6803.h"
+#include "rtcc.h"
+#include "current_monitor.h"
+#include "analog.h"
 #include "comm_can.h"
 
 void console_process_command(char *command)
@@ -61,11 +64,29 @@ void console_process_command(char *command)
     }
     else if (strcmp(argv[0], "cell_voltages") == 0) {
         Config *config = config_get_configuration();
-        uint16_t *cells = ltc6803_get_cell_voltages();
+        float *cells = ltc6803_get_cell_voltages();
         for (uint8_t i = 0; i < config->numCells; i++)
         {
-            console_printf("Cell %d: %fmV\n", i + 1, cells[i] * 1.5);
+            console_printf("Cell %d: %.4fV\n", i + 1, cells[i]);
         }
+        console_printf("\r\n");
+    }
+    else if (strcmp(argv[0], "current") == 0) {
+        console_printf("Battery current: %.2fA\n", current_monitor_get_current());
+        console_printf("\r\n");
+    }
+    else if (strcmp(argv[0], "voltage") == 0) {
+        console_printf("Bus voltage: %.2fV\n", current_monitor_get_bus_voltage());
+        console_printf("\r\n");
+    }
+    else if (strcmp(argv[0], "temp") == 0) {
+        float temp = analog_temperature();
+        console_printf("Board temperature: %.2f degrees C\n", (double)temp);
+        console_printf("\r\n");
+    }
+    else if (strcmp(argv[0], "rtcc") == 0) {
+        Time time = rtcc_get_time();
+        console_printf("RTCC time: %d/%d/%04d %02d:%02d:%02d\n", time.month, time.day, time.year, time.hour, time.minute, time.second);
         console_printf("\r\n");
     }
     else if (strcmp(argv[0], "infinity_current") == 0) {

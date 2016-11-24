@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include "console.h"
 #include "datatypes.h"
+#include "current_monitor.h"
+#include "charger.h"
+#include "analog.h"
+#include "utils.h"
 
 static uint16_t packet_index;
 static uint8_t packet_buffer[2048];
@@ -42,6 +46,7 @@ static void process_packet(unsigned char *data, unsigned int len)
     uint8_t id = data[0];
     data++;
     len--;
+    uint32_t inx = 0;
     switch(id)
     {
         case PACKET_CONNECT:
@@ -51,6 +56,14 @@ static void process_packet(unsigned char *data, unsigned int len)
             data[len] = '\0';
             console_process_command(data);
             break;
+        case PACKET_GET_DATA:
+            packet_send_buffer[inx++] = PACKET_GET_DATA;
+            utils_append_float32(packet_send_buffer, current_monitor_get_bus_voltage(), &inx);
+            utils_append_float32(packet_send_buffer, analog_temperature(), &inx);
+            utils_append_float32(packet_send_buffer, current_monitor_get_current(), &inx);
+            utils_append_float32(packet_send_buffer, charger_get_output_voltage(), &inx);
+            packet_send_buffer[inx++] = '\n';
+            packet_send_packet((unsigned char*)packet_send_buffer, inx);
         default:
             break;
     }
