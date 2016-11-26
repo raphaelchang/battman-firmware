@@ -27,6 +27,7 @@ On Ubuntu 14.04, dfu-util must be installed from source. See instructions here: 
 ####Uploading code
 
 1. Plug in Battman to computer via USB.
-2. Enable bootloader mode by reseting the board while the bootloader button is held down.
-3. Ensure that no other boards are connected that are also in bootloader mode.
-4. Run the following to build and upload the code. ```make upload```
+2. Ensure that nothing is connected to the discharge output of the BMS.
+3. Enable bootloader mode by reseting the board while the bootloader button is held down.
+4. Ensure that no other boards are connected that are also in bootloader mode.
+5. Run the following to build and upload the code. ```make upload```
