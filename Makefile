@@ -122,7 +122,7 @@ CSRC = $(STARTUPSRC) \
        $(TESTSRC) \
        $(CHIBIOS)/os/hal/lib/streams/memstreams.c \
        $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
-       main.c gpio.c led_rgb.c ltc6803.c comm_usb.c comm_can.c packet.c console.c charger.c analog.c rtcc.c power.c current_monitor.c buzzer.c eeprom.c config.c accessory.c ws2812b.c faults.c
+       main.c gpio.c led_rgb.c ltc6803.c comm_usb.c comm_can.c packet.c console.c charger.c analog.c rtcc.c power.c current_monitor.c buzzer.c eeprom.c config.c accessory.c ws2812b.c faults.c fw_updater.c crc.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.

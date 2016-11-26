@@ -28,7 +28,7 @@ static void set_voltage(float voltage);
 void charger_init(void)
 {
     config = config_get_configuration();
-    palClearPad(CHG_SW_GPIO, CHG_SW_PIN);
+    palSetPad(CHG_SW_GPIO, CHG_SW_PIN);
 #ifdef BATTMAN_4_0
     uint8_t tx[2];
     uint8_t rx[2];
@@ -146,15 +146,17 @@ void charger_update(void)
     }
     else
     {
-        palClearPad(CHG_SW_GPIO, CHG_SW_PIN);
+        if (!is_charging)
+        {
+            palSetPad(CHG_SW_GPIO, CHG_SW_PIN);
+            chargeComplete = false;
+            chargeCompleteCounter = 0;
+        }
+        else
+            palClearPad(CHG_SW_GPIO, CHG_SW_PIN);
         current_control_integral = 0.0;
         balancing = false;
         ltc6803_disable_balance_all();
-    }
-    if (!is_charging)
-    {
-        chargeComplete = false;
-        chargeCompleteCounter = 0;
     }
     lastTime = chVTGetSystemTime();
 }

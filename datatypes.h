@@ -7,7 +7,11 @@ typedef enum
 {
     PACKET_CONNECT = 0x00,
     PACKET_CONSOLE = 0x01,
-    PACKET_GET_DATA = 0x02
+    PACKET_GET_DATA = 0x02,
+    PACKET_GET_CELLS = 0x03,
+    PACKET_ERASE_NEW_FW = 0x04,
+    PACKET_WRITE_NEW_FW = 0x05,
+    PACKET_JUMP_BOOTLOADER = 0x06
 } PacketID;
 
 typedef enum

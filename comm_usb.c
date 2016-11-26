@@ -353,6 +353,7 @@ static int serial_rx_write_pos = 0;
 static THD_WORKING_AREA(serial_read_thread_wa, 512);
 static THD_WORKING_AREA(serial_process_thread_wa, 4096);
 static THD_WORKING_AREA(serial_init_thread_wa, 256);
+static THD_WORKING_AREA(packet_timeout_thread_wa, 256);
 static mutex_t send_mutex;
 static thread_t *process_tp;
 
@@ -412,7 +413,13 @@ static THD_FUNCTION(serial_init_thread, arg) {
     sduStart(&SDU1, &serusbcfg);
 
     usbDisconnectBus(serusbcfg.usbp);
+    palSetPadMode(USB_DM_GPIO, USB_DM_PIN, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetPadMode(USB_DP_GPIO, USB_DP_PIN, PAL_MODE_OUTPUT_PUSHPULL);
+    palClearPad(USB_DM_GPIO, USB_DM_PIN);
+    palClearPad(USB_DP_GPIO, USB_DP_PIN);
     chThdSleepMilliseconds(1500);
+    palSetPadMode(USB_DM_GPIO, USB_DM_PIN, PAL_MODE_ALTERNATE(14));
+    palSetPadMode(USB_DP_GPIO, USB_DP_PIN, PAL_MODE_ALTERNATE(14));
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp)
     
@@ -421,9 +428,25 @@ static THD_FUNCTION(serial_init_thread, arg) {
     chThdCreateStatic(serial_process_thread_wa, sizeof(serial_process_thread_wa), NORMALPRIO, serial_process_thread, NULL);
 }
 
+static THD_FUNCTION(packet_timeout_thread, arg) {
+    packet_timeout();
+    chThdSleepMilliseconds(1);
+}
+
 void comm_usb_init(void)
 {
     chThdCreateStatic(serial_init_thread_wa, sizeof(serial_init_thread_wa), NORMALPRIO, serial_init_thread, NULL);
+    chThdCreateStatic(packet_timeout_thread_wa, sizeof(packet_timeout_thread_wa), NORMALPRIO, packet_timeout_thread, NULL);
+}
+
+void comm_usb_deinit(void)
+{
+    usbDisconnectBus(serusbcfg.usbp);
+    palSetPadMode(USB_DM_GPIO, USB_DM_PIN, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetPadMode(USB_DP_GPIO, USB_DP_PIN, PAL_MODE_OUTPUT_PUSHPULL);
+    palClearPad(USB_DM_GPIO, USB_DM_PIN);
+    palClearPad(USB_DP_GPIO, USB_DP_PIN);
+    usbStop(serusbcfg.usbp);
 }
 
 void comm_usb_send(unsigned char *buffer, unsigned int len) {

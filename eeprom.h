@@ -34,11 +34,11 @@
 
 /* Exported constants --------------------------------------------------------*/
 /* Define the STM32F3xx Flash page size depending on the used STM32 device */
-#define PAGE_SIZE  (uint16_t)0x4000  /* Page size = 16KByte */
+#define PAGE_SIZE  (uint16_t)0x800  /* Page size = 2KByte */
 
 /* EEPROM start address in Flash */
-#define EEPROM_START_ADDRESS    ((uint32_t)0x08004000) /* EEPROM emulation start address:
-							  after 64KByte of used Flash memory */
+#define EEPROM_START_ADDRESS    ((uint32_t)0x08000800) /* EEPROM emulation start address:
+							  after 2KByte of used Flash memory */
 
 /* Pages 0 and 1 base and end addresses */
 #define PAGE0_BASE_ADDRESS      ((uint32_t)(EEPROM_START_ADDRESS + 0x000))
