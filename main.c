@@ -193,6 +193,7 @@ int main(void) {
         comm_can_update();
         if (power_is_shutdown())
         {
+            comm_usb_deinit();
             led_rgb_set(0);
             buzzer_set_frequency(0);
             break;

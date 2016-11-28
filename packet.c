@@ -18,12 +18,14 @@
 
 #define PACKET_TIMEOUT 1000
 #define PACKET_START 'P'
+#define PACKET_LONG_START 'Q'
 #define PACKET_END '\n'
 
 typedef enum
 {
     START,
-    LENGTH,
+    LENGTH_HIGH,
+    LENGTH_LOW,
     DATA,
     CRC_HIGH,
     CRC_LOW,
@@ -36,7 +38,7 @@ static uint8_t packet_send_buffer[1024];
 static bool connect_event = false;
 static PacketState process_state = START;
 static uint16_t process_timeout = PACKET_TIMEOUT;
-static uint8_t packet_length = 0;
+static uint16_t packet_length = 0;
 static uint16_t packet_crc = 0;
 
 static void process_packet(unsigned char *data, unsigned int len);
@@ -46,21 +48,29 @@ void packet_process_byte(uint8_t byte)
     switch (process_state)
     {
         case START:
-            if (byte == PACKET_START)
+            if (byte == PACKET_START || byte == PACKET_LONG_START)
             {
-                process_state = LENGTH;
+                if (byte == PACKET_START)
+                    process_state = LENGTH_LOW;
+                else
+                    process_state = LENGTH_HIGH;
                 packet_index = 0;
                 packet_length = 0;
                 process_timeout = PACKET_TIMEOUT;
             }
             break;
-        case LENGTH:
-            packet_length = byte;
-            process_state = DATA;
-            if (packet_length <= 0 || packet_length > 255)
+        case LENGTH_HIGH:
+            packet_length = byte << 8;
+            process_state = LENGTH_LOW;
+            process_timeout = PACKET_TIMEOUT;
+            break;
+        case LENGTH_LOW:
+            packet_length |= byte;
+            if (packet_length <= 0 || packet_length > 2048)
             {
                 process_state = START;
             }
+            process_state = DATA;
             process_timeout = PACKET_TIMEOUT;
             break;
         case DATA:
@@ -119,10 +129,18 @@ static void process_packet(unsigned char *data, unsigned int len)
     uint32_t inx = 0;
     uint16_t res;
     uint32_t offset;
+    uint16_t config_addr;
+    uint8_t config_value[4];
+    uint8_t readInx = 0;
     switch(id)
     {
         case PACKET_CONNECT:
             connect_event = true;
+            packet_send_buffer[inx++] = PACKET_CONNECT;
+            packet_send_buffer[inx++] = FW_VERSION_MAJOR + '0';
+            packet_send_buffer[inx++] = '.';
+            packet_send_buffer[inx++] = FW_VERSION_MINOR + '0';
+            packet_send_packet((unsigned char*)packet_send_buffer, inx);
             break;
         case PACKET_CONSOLE:
             data[len] = '\0';
@@ -134,7 +152,6 @@ static void process_packet(unsigned char *data, unsigned int len)
             utils_append_float32(packet_send_buffer, analog_temperature(), &inx);
             utils_append_float32(packet_send_buffer, current_monitor_get_current(), &inx);
             utils_append_float32(packet_send_buffer, charger_get_output_voltage(), &inx);
-            packet_send_buffer[inx++] = '\n';
             packet_send_packet((unsigned char*)packet_send_buffer, inx);
             break;
         case PACKET_GET_CELLS:
@@ -144,14 +161,12 @@ static void process_packet(unsigned char *data, unsigned int len)
             {
                 utils_append_float32(packet_send_buffer, cells[i], &inx);
             }
-            packet_send_buffer[inx++] = '\n';
             packet_send_packet((unsigned char*)packet_send_buffer, inx);
             break;
         case PACKET_ERASE_NEW_FW:
             res = fw_updater_erase_new_firmware();
             packet_send_buffer[inx++] = PACKET_ERASE_NEW_FW;
             packet_send_buffer[inx++] = res == FLASH_COMPLETE ? 1 : 0;
-            packet_send_buffer[inx++] = '\n';
             packet_send_packet((unsigned char*)packet_send_buffer, inx);
             break;
         case PACKET_WRITE_NEW_FW:
@@ -160,11 +175,29 @@ static void process_packet(unsigned char *data, unsigned int len)
             inx = 0;
             packet_send_buffer[inx++] = PACKET_WRITE_NEW_FW;
             packet_send_buffer[inx++] = res == FLASH_COMPLETE ? 1 : 0;
-            packet_send_buffer[inx++] = '\n';
             packet_send_packet((unsigned char*)packet_send_buffer, inx);
             break;
         case PACKET_JUMP_BOOTLOADER:
             fw_updater_jump_bootloader();
+            break;
+        case PACKET_CONFIG_SET_FIELD:
+            config_addr = utils_parse_uint16(data, &inx);
+            utils_reverse_copy(config_value, data + inx, len - inx);
+            res = config_write_field(config_addr, config_value, len - inx);
+            readInx = inx;
+            inx = 0;
+            packet_send_buffer[inx++] = PACKET_CONFIG_SET_FIELD;
+            utils_append_uint16(packet_send_buffer, config_addr, &inx);
+            utils_reverse_copy(packet_send_buffer + inx, config_value, len - readInx);
+            inx += len - readInx;
+            packet_send_packet((unsigned char*)packet_send_buffer, inx);
+            break;
+        case PACKET_CONFIG_GET_ALL:
+            // Note: the config struct is sent in little endian
+            packet_send_buffer[inx++] = PACKET_CONFIG_GET_ALL;
+            memcpy(packet_send_buffer + inx, config_get_configuration(), sizeof(Config));
+            inx += sizeof(Config);
+            packet_send_packet((unsigned char*)packet_send_buffer, inx);
             break;
         default:
             break;
@@ -175,9 +208,23 @@ void packet_send_packet(unsigned char *data, unsigned int len)
 {
     unsigned char buffer[512];
     unsigned int inx = 0;
-    buffer[inx++] = 'P';
+    if (len > 255)
+    {
+        buffer[inx++] = PACKET_LONG_START;
+        buffer[inx++] = (uint8_t)(len >> 8);
+        buffer[inx++] = (uint8_t)(len & 0xFF);
+    }
+    else
+    {
+        buffer[inx++] = PACKET_START;
+        buffer[inx++] = (uint8_t)len;
+    }
     memcpy(buffer + inx, data, len);
     inx += len;
+    uint16_t crc = crc16(data, len);
+    buffer[inx++] = (uint8_t)(crc >> 8);
+    buffer[inx++] = (uint8_t)(crc & 0xFF);
+    buffer[inx++] = PACKET_END;
     comm_usb_send(buffer, inx);
 }
 

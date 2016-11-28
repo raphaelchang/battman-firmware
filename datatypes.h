@@ -11,7 +11,11 @@ typedef enum
     PACKET_GET_CELLS = 0x03,
     PACKET_ERASE_NEW_FW = 0x04,
     PACKET_WRITE_NEW_FW = 0x05,
-    PACKET_JUMP_BOOTLOADER = 0x06
+    PACKET_JUMP_BOOTLOADER = 0x06,
+    PACKET_CONFIG_SET_FIELD = 0x07,
+    PACKET_CONFIG_GET_FIELD = 0x08,
+    PACKET_CONFIG_SET_ALL = 0x09,
+    PACKET_CONFIG_GET_ALL = 0x0A
 } PacketID;
 
 typedef enum
@@ -50,7 +54,7 @@ typedef enum
     BYPASS_CCCV
 } ChargeMode;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     volatile uint8_t CANDeviceID;
     volatile uint8_t numCells;
@@ -61,7 +65,7 @@ typedef struct
     volatile float chargeCurrent;
     volatile uint16_t turnOnDelay;
     volatile uint16_t shutdownDelay;
-    volatile ChargeMode chargeMode;
+    volatile uint8_t chargeMode;
     volatile float chargeCurrentGain_P;
     volatile float chargeCurrentGain_I;
     volatile uint16_t prechargeTimeout;
