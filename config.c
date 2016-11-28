@@ -33,9 +33,18 @@ void config_load_default_configuration(void)
 {
     config.CANDeviceID = 0x01;
     config.numCells = 12;
-    config.lowVoltageCutoff = 2.8;
-    config.highVoltageCutoff = 3.65;
+    config.fullCellVoltage = 4.2;
+    config.emptyCellVoltage = 3.4;
+    config.packCapacity = 2500;
+    config.lowVoltageCutoff = 3.2;
+    config.lowVoltageWarning = 3.4;
+    config.highVoltageCutoff = 4.25;
+    config.highVoltageWarning = 4.1;
     config.maxCurrentCutoff = 120.0;
+    config.maxContinuousCurrent = 100.0;
+    config.continuousCurrentCutoffTime = 30;
+    config.continuousCurrentCutoffWarning = 10;
+    config.maxChargeCurrent = 20.0;
     config.chargeVoltage = 43.2;
     config.chargeCurrent = 2.0;
     config.turnOnDelay = 200;
@@ -105,9 +114,20 @@ bool config_write_field(uint16_t addr, uint8_t *data, uint8_t size)
             *((float*)data) = 0.0;
         }
     }
+    else if (addr == offsetof(Config, chargeVoltage))
+    {
+        if (*((float*)data) > config.numCells * config.highVoltageCutoff)
+        {
+            *((float*)data) = config.numCells * config.highVoltageCutoff;
+        }
+        else if (*((float*)data) < 0.0)
+        {
+            *((float*)data) = 0.0;
+        }
+    }
     else
     {
-        return false;
+        /*return false;*/
     }
     memcpy((void*)&config + addr, (void*)data, size);
 

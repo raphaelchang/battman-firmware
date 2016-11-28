@@ -58,9 +58,18 @@ typedef struct __attribute__((__packed__))
 {
     volatile uint8_t CANDeviceID;
     volatile uint8_t numCells;
+    volatile float fullCellVoltage;
+    volatile float emptyCellVoltage;
+    volatile float packCapacity;
     volatile float lowVoltageCutoff;
+    volatile float lowVoltageWarning;
     volatile float highVoltageCutoff;
+    volatile float highVoltageWarning;
     volatile float maxCurrentCutoff;
+    volatile float maxContinuousCurrent;
+    volatile uint8_t continuousCurrentCutoffTime;
+    volatile uint8_t continuousCurrentCutoffWarning;
+    volatile float maxChargeCurrent;
     volatile float chargeVoltage;
     volatile float chargeCurrent;
     volatile uint16_t turnOnDelay;

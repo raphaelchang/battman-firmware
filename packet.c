@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "fw_updater.h"
 #include "stm32f30x_conf.h"
+#include "faults.h"
 #include "crc.h"
 
 #define PACKET_TIMEOUT 1000
@@ -152,6 +153,8 @@ static void process_packet(unsigned char *data, unsigned int len)
             utils_append_float32(packet_send_buffer, analog_temperature(), &inx);
             utils_append_float32(packet_send_buffer, current_monitor_get_current(), &inx);
             utils_append_float32(packet_send_buffer, charger_get_output_voltage(), &inx);
+            packet_send_buffer[inx++] = faults_get_faults();
+            packet_send_buffer[inx++] = charger_is_charging();
             packet_send_packet((unsigned char*)packet_send_buffer, inx);
             break;
         case PACKET_GET_CELLS:
