@@ -6,6 +6,7 @@
 #include <string.h>
 #include "utils.h"
 #include <stddef.h>
+#include "current_monitor.h"
 
 #define EEPROM_BASE              1000
 
@@ -124,6 +125,18 @@ bool config_write_field(uint16_t addr, uint8_t *data, uint8_t size)
         {
             *((float*)data) = 0.0;
         }
+    }
+    else if (addr == offsetof(Config, maxCurrentCutoff))
+    {
+        if (*((float*)data) > 150.0)
+        {
+            *((float*)data) = 150.0;
+        }
+        else if (*((float*)data) < 1.0)
+        {
+            *((float*)data) = 1.0;
+        }
+        current_monitor_set_overcurrent(*((float*)data));
     }
     else
     {

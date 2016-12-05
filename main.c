@@ -13,6 +13,7 @@
 #include "power.h"
 #include "config.h"
 #include "current_monitor.h"
+#include "soc.h"
 #include "analog.h"
 #include "rtcc.h"
 #include "buzzer.h"
@@ -172,6 +173,7 @@ int main(void) {
     ltc6803_init();
     charger_init();
     current_monitor_init();
+    soc_init();
     rtcc_init();
     accessory_init();
     comm_can_init();
@@ -186,6 +188,7 @@ int main(void) {
         analog_update();
         ltc6803_update();
         current_monitor_update();
+        soc_update();
         charger_update();
         power_update();
         rtcc_update();

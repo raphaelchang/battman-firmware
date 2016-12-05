@@ -33,6 +33,7 @@ void rtcc_init(void)
 
 void rtcc_update(void)
 {
+    i2cAcquireBus(&I2C_DEV);
     uint8_t tx[1];
     uint8_t rx[1];
     tx[0] = 0x01;
@@ -53,6 +54,7 @@ void rtcc_update(void)
     tx[0] = 0x07;
     i2cMasterTransmitTimeout(&I2C_DEV, I2C_ADDRESS, tx, 1, rx, 1, MS2ST(10));
     time.year = (rx[0] >> 4) * 10 + (rx[0] & 0x0F);
+    i2cReleaseBus(&I2C_DEV);
 }
 
 Time rtcc_get_time(void)

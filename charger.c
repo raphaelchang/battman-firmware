@@ -194,6 +194,7 @@ void charger_disable(void)
 
 static void set_voltage(float voltage)
 {
+    i2cAcquireBus(&I2C_DEV);
 #ifdef BATTMAN_4_0
     float resistance = (5100 * voltage - 1.26 * (5100 + 200000)) / (1.26 - voltage);
     uint16_t value = (uint16_t)((resistance / 20000) * 1024);
@@ -217,4 +218,5 @@ static void set_voltage(float voltage)
     i2cMasterTransmitTimeout(&I2C_DEV, I2C_ADDRESS, tx, 3, rx, 0, MS2ST(10));
 #endif
     output_voltage = voltage;
+    i2cReleaseBus(&I2C_DEV);
 }
