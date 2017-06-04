@@ -13,6 +13,7 @@
 #include "rtcc.h"
 #include "current_monitor.h"
 #include "analog.h"
+#include "power.h"
 #include "comm_can.h"
 
 void console_process_command(char *command)
@@ -84,9 +85,33 @@ void console_process_command(char *command)
         console_printf("Board temperature: %.2f degrees C\n", (double)temp);
         console_printf("\r\n");
     }
+    else if (strcmp(argv[0], "charger_voltage") == 0) {
+        console_printf("Charger input voltage: %.2fV\n", analog_charger_input_voltage());
+        console_printf("\r\n");
+    }
+    else if (strcmp(argv[0], "power_on_event") == 0) {
+        console_printf("Power on event: %d\n", power_get_power_on_event());
+        console_printf("\r\n");
+    }
     else if (strcmp(argv[0], "rtcc") == 0) {
         Time time = rtcc_get_time();
         console_printf("RTCC time: %d/%d/%04d %02d:%02d:%02d\n", time.month, time.day, time.year, time.hour, time.minute, time.second);
+        console_printf("\r\n");
+    }
+    else if (strcmp(argv[0], "enable_drain") == 0) {
+        Config *config = config_get_configuration();
+        console_printf("Enabling all balance resistors...\n");
+        for (uint8_t i = 0; i < config->numCells; i++)
+        {
+            ltc6803_enable_balance(i + 1);
+        }
+        ltc6803_lock();
+        console_printf("\r\n");
+    }
+    else if (strcmp(argv[0], "disable_drain") == 0) {
+        console_printf("Disabling all balance resistors...\n");
+        ltc6803_unlock();
+        ltc6803_disable_balance_all();
         console_printf("\r\n");
     }
     else if (strcmp(argv[0], "infinity_current") == 0) {

@@ -20,6 +20,7 @@ static const SPIConfig ls_spicfg = {
 static volatile Config *config;
 static float cells[12];
 static uint8_t configReg[6];
+static bool lock = false;
 static volatile systime_t conversionStart;
 static void ltc6803_wrcfg(uint8_t config[6]);
 static void ltc6803_stcvad(void);
@@ -62,6 +63,8 @@ float* ltc6803_get_cell_voltages(void)
 
 void ltc6803_enable_balance(uint8_t cell)
 {
+    if (lock)
+        return;
     if (cell > config->numCells)
         return;
     if (cell <= 8)
@@ -76,6 +79,8 @@ void ltc6803_enable_balance(uint8_t cell)
 
 void ltc6803_disable_balance(uint8_t cell)
 {
+    if (lock)
+        return;
     if (cell > config->numCells)
         return;
     if (cell <= 8)
@@ -90,8 +95,20 @@ void ltc6803_disable_balance(uint8_t cell)
 
 void ltc6803_disable_balance_all(void)
 {
+    if (lock)
+        return;
     configReg[1] = 0;
     configReg[2] = 0;
+}
+
+void ltc6803_lock(void)
+{
+    lock = true;
+}
+
+void ltc6803_unlock(void)
+{
+    lock = false;
 }
 
 static void ltc6803_wrcfg(uint8_t config[6])
@@ -122,7 +139,7 @@ static void ltc6803_wrcfg(uint8_t config[6])
     spiSelect(&SPID1);                  /* Slave Select assertion.          */
 #ifdef BATTMAN_4_0
     spi_sw_transfer(rxbuf, cmd, CMD_LEN);
-#elif defined(BATTMAN_4_1)
+#else
     spiExchange(&SPID1, CMD_LEN, cmd, rxbuf);
 #endif
 
@@ -141,7 +158,7 @@ static void ltc6803_stcvad(void)
     spiSelect(&SPID1);
 #ifdef BATTMAN_4_0
     spi_sw_transfer(rxbuf, txbuf, 2);
-#elif defined(BATTMAN_4_1)
+#else
     spiExchange(&SPID1, 2, txbuf, rxbuf);
 #endif
     spiUnselect(&SPID1);                /* Slave Select de-assertion.       */
@@ -165,7 +182,7 @@ static void ltc6803_rdcv(float cells[12])
     spiSelect(&SPID1);
 #ifdef BATTMAN_4_0
     spi_sw_transfer(rxbuf, txbuf, 2);
-#elif defined(BATTMAN_4_1)
+#else
     spiExchange(&SPID1, 2, txbuf, rxbuf);
 #endif
     txbuf[0] = 0xFF;
@@ -173,7 +190,7 @@ static void ltc6803_rdcv(float cells[12])
     {
 #ifdef BATTMAN_4_0
         spi_sw_transfer(rxbuf, txbuf, 1);
-#elif defined(BATTMAN_4_1)
+#else
         spiExchange(&SPID1, 1, txbuf, rxbuf);
 #endif
         rx_data[data_counter++] = rxbuf[0];

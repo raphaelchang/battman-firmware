@@ -9,6 +9,8 @@
 #include "hw_conf_v4.0.h"
 #elif defined BATTMAN_4_1
 #include "hw_conf_v4.1.h"
+#elif defined BATTMAN_4_2
+#include "hw_conf_v4.2.h"
 #else
 #error "Hardware version not defined!"
 #endif

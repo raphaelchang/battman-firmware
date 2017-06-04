@@ -131,7 +131,7 @@ void charger_update(void)
             if (current_monitor_get_bus_voltage() >= config->chargeVoltage && fabs(current_monitor_get_current()) < config->chargeCurrent / 10.0)
             {
                 chargeCompleteCounter++;
-                if (chargeCompleteCounter > 10)
+                if (chargeCompleteCounter > 100)
                     chargeComplete = true;
             }
             else
@@ -203,8 +203,12 @@ static void set_voltage(float voltage)
     tx[0] = 0x01 << 2 | ((value >> 8) & 0x03);
     tx[1] = value & 0xFF;
     i2cMasterTransmitTimeout(&I2C_DEV, 0x2E, tx, 2, rx, 0, MS2ST(10));
-#elif defined(BATTMAN_4_1)
+#elif defined(BATTMAN_4_1) || defined(BATTMAN_4_2)
+#if defined(BATTMAN_4_1)
     float dac_voltage = 0.075 * (51.66 - voltage);
+#else
+    float dac_voltage = 0.075 * (51.584 - voltage);
+#endif
     if (dac_voltage < 0)
         dac_voltage = 0;
     else if (dac_voltage > 3.3)

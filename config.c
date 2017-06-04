@@ -46,11 +46,11 @@ void config_load_default_configuration(void)
     config.continuousCurrentCutoffTime = 30;
     config.continuousCurrentCutoffWarning = 10;
     config.maxChargeCurrent = 20.0;
-    config.chargeVoltage = 43.2;
+    config.chargeVoltage = 25.2;
     config.chargeCurrent = 2.0;
     config.turnOnDelay = 200;
     config.shutdownDelay = 500;
-    config.chargeMode = CURRENT_CONTROL;
+    config.chargeMode = FULL_CURRENT;
     config.chargeCurrentGain_P = 0.1;
     config.chargeCurrentGain_I = 1.0;
     config.prechargeTimeout = 500;

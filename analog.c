@@ -71,7 +71,7 @@ void analog_update(void)
 
 float analog_charger_input_voltage(void)
 {
-    return charger_input_voltage / 4095.0 * 3.3 * (39000.0 + 18000.0 + 4700.0) / 4700.0;
+    return (float)charger_input_voltage / 4095.0 * 3.3 * (51000.0 + 18000.0 + 4700.0) / 4700.0;
 }
 
 float analog_temperature(void)
@@ -81,6 +81,6 @@ float analog_temperature(void)
 
 float analog_discharge_voltage(void)
 {
-    return discharge_voltage * (3.3 / 4095.0) * (200000.0 + 100 + 2500 + 10000.0) / 10000.0;
+    return (float)discharge_voltage * (3.3 / 4095.0) * (200000.0 + 100 + 2500 + 10000.0) / 10000.0;
 
 }

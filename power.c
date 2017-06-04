@@ -26,12 +26,16 @@ void power_init(void)
         power_on_event = EVENT_SWITCH;
     else if (analog_charger_input_voltage() > 6.0)
         power_on_event = EVENT_CHARGER;
-#ifdef BATTMAN_4_1
+#if defined(BATTMAN_4_1) || defined(BATTMAN_4_2)
     else if (!palReadPad(RTCC_INT_GPIO, RTCC_INT_PIN))
         power_on_event = EVENT_RTCC;
 #endif
-    else
+#if defined(BATTMAN_4_2)
+    else if (palReadPad(USB_DETECT_GPIO, USB_DETECT_PIN))
+    {
         power_on_event = EVENT_USB;
+    }
+#endif
     if (power_on_event == EVENT_SWITCH)
     {
         chThdSleepMilliseconds(config->turnOnDelay);
@@ -96,7 +100,7 @@ void power_update(void)
         palClearPad(DSG_SW_GPIO, DSG_SW_PIN);
         palClearPad(PWR_SW_GPIO, PWR_SW_PIN);
     }
-    else if (((!palReadPad(PWR_BTN_GPIO, PWR_BTN_PIN) && power_button_released) && analog_charger_input_voltage() < 6.0 && power_on_event != EVENT_USB) || power_on_event == EVENT_RTCC)
+    else if (((!palReadPad(PWR_BTN_GPIO, PWR_BTN_PIN) && power_button_released) && analog_charger_input_voltage() < 6.0 && !palReadPad(USB_DETECT_GPIO, USB_DETECT_PIN)) || power_on_event == EVENT_RTCC)
     {
         if (!shutdownStarted)
         {
