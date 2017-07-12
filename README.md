@@ -1,11 +1,11 @@
-#battman-firmware
+# battman-firmware
 Firmware for the "battman" battery management system.
-##Setup
+## Setup
  Clone repostiory. 
 ```
 git clone https://github.com/raphaelchang/battman-firmware.git
 ```
-##Compiling
+## Compiling
 You'll need to install the following gcc arm cross compiler.
 ```
 sudo apt-get install gcc-arm-none-eabi
@@ -14,17 +14,17 @@ To build the files. Navigate to the root of the repository and run the following
 ```
 make
 ```
-##Programming
+## Programming
 You'll need to install dfu-util v0.9 or higher. 
-####Mac OS
+#### Mac OS
 On Mac, the homebrew version is adequate. 
 ```
 brew install dfu-util
 ```
-####Ubuntu
+#### Ubuntu
 On Ubuntu 14.04, dfu-util must be installed from source. See instructions here: http://dfu-util.sourceforge.net/build.html.
 
-####Uploading code
+#### Uploading code
 
 1. Plug in Battman to computer via USB.
 2. Ensure that nothing is connected to the discharge output of the BMS.
