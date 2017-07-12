@@ -9,6 +9,8 @@ git clone https://github.com/raphaelchang/battman-firmware.git
 You'll need to install the following gcc arm cross compiler.
 #### Mac OS
 ```
+brew tap PX4/homebrew-px4
+brew update
 brew install gcc-arm-none-eabi
 ```
 #### Ubuntu
