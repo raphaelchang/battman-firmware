@@ -1,7 +1,7 @@
 # battman-firmware
 Firmware for the "battman" battery management system.
 ## Setup
- Clone repostiory. 
+ Clone repository. 
 ```
 git clone https://github.com/raphaelchang/battman-firmware.git
 ```
@@ -17,7 +17,7 @@ brew install gcc-arm-none-eabi
 ```
 sudo apt-get install gcc-arm-none-eabi
 ```
-To build the files. Navigate to the root of the repository and run the following:
+To build the files, navigate to the root of the repository and run the following:
 ```
 make
 ```
