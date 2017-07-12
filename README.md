@@ -7,6 +7,11 @@ git clone https://github.com/raphaelchang/battman-firmware.git
 ```
 ## Compiling
 You'll need to install the following gcc arm cross compiler.
+#### Mac OS
+```
+brew install gcc-arm-none-eabi
+```
+#### Ubuntu
 ```
 sudo apt-get install gcc-arm-none-eabi
 ```
