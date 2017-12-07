@@ -1,4 +1,6 @@
-# battman-firmware
+<img align="right" height="100" src="https://raphaelchang.com/wp-content/uploads/Battman.png">
+
+# Battman Firmware
 Firmware for the "battman" battery management system.
 ## Setup
  Clone repository. 
